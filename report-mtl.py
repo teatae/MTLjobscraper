@@ -115,6 +115,7 @@ def taePopUrls(data_Website, pUrl):
 def taeDataCase(pUrl, current_data, current_full_data, data_Website):
     website = current_full_data[5]
     title = current_full_data[0]
+    current_data[1] = " ".join(((current_data[1]).strip()).split())
     if (title == ""):
         print("No title linked to the following data:", current_full_data)
     elif [pUrl] not in getSubData(6, 7, data_Website):         #URL does not exist
