@@ -27,7 +27,7 @@ print("Welcome to Tae's beautiful scraper")
 
 # output file name
 filename = "report-mtl.csv"
-backup = filename[:len(filename)-4]+'-BACKUP.csv'
+backup = filename[:len(filename)-4]+' - Copy.csv'
 print("Current filename is "+filename+"\n")
 
 # csv file header
