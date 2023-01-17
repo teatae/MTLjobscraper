@@ -115,7 +115,10 @@ def taePopUrls(data_Website, pUrl):
 def taeDataCase(pUrl, current_data, current_full_data, data_Website):
     website = current_full_data[5]
     title = current_full_data[0]
+
     current_data[1] = " ".join(((current_data[1]).strip()).split())
+    current_full_data[1] = current_data[1]
+
     if (title == ""):
         print("No title linked to the following data:", current_full_data)
     elif [pUrl] not in getSubData(6, 7, data_Website):         #URL does not exist
@@ -230,7 +233,7 @@ else:
                     elif (website == "Monster"):
                         data_Monster.append(row)
                     elif (website == "Workopolis"):
-                        data_Workopolis.append(row)
+                        row, data_Workopolis.append(row)
                     elif (website == "Jobillico"):
                         data_Jobillico.append(row)
                     elif (website == "Google jobs"):
@@ -241,29 +244,29 @@ else:
                         data_Jobboom.append(row)
                     else:
                         print(website)
-                    '''
+                    ''' this is used to remove duplicates
                                         if (website == "Indeed"):
-                        taeDataCase(row[6], row[0:3], row, data_Indeed)
+                        taeDataCase(row[6], row[0:4], row, data_Indeed)
                     elif (website == "Jobrapido"):
-                        taeDataCase(row[6], row[0:3], row, data_Jobrapido)
+                        taeDataCase(row[6], row[0:4], row, data_Jobrapido)
                     elif (website == "Stackoverflow"):
-                        taeDataCase(row[6], row[0:3], row, data_Stackoverflow)
+                        taeDataCase(row[6], row[0:4], row, data_Stackoverflow)
                     elif (website == "Eluta"):
-                        taeDataCase(row[6], row[0:3], row, data_Eluta)
+                        taeDataCase(row[6], row[0:4], row, data_Eluta)
                     elif (website == "Linkedin"):
-                        taeDataCase(row[6], row[0:3], row, data_Linkedin)
+                        taeDataCase(row[6], row[0:4], row, data_Linkedin)
                     elif (website == "Monster"):
-                        taeDataCase(row[6], row[0:3], row, data_Monster)
+                        taeDataCase(row[6], row[0:4], row, data_Monster)
                     elif (website == "Workopolis"):
-                        taeDataCase(row[6], row[0:3], row, data_Workopolis)
+                        taeDataCase(row[6], row[0:4], row, data_Workopolis)
                     elif (website == "Jobillico"):
-                        taeDataCase(row[6], row[0:3], row, data_Jobillico)
+                        taeDataCase(row[6], row[0:4], row, data_Jobillico)
                     elif (website == "Google jobs"):
-                        taeDataCase(row[6], row[0:3], row, data_Google_jobs)
+                        taeDataCase(row[6], row[0:4], row, data_Google_jobs)
                     elif (website == "Facebook"):
-                        taeDataCase(row[6], row[0:3], row, data_Facebook)
+                        taeDataCase(row[6], row[0:4], row, data_Facebook)
                     elif (website == "Jobboom"):
-                        taeDataCase(row[6], row[0:3], row, data_Jobboom)
+                        taeDataCase(row[6], row[0:4], row, data_Jobboom)
                     else:
                         print(website)
                     '''
@@ -299,6 +302,7 @@ else:
             print("First full_data in the table is ",str(data_Jobboom[0]).encode().decode())
         else:
             print("what the hell")
+
 
 '''
 cap_Indeed = 0 #25
@@ -1134,6 +1138,7 @@ if driver.find_elements('css selector', "input.gLFyf.gsfi"):
             taeDataCase(pUrl, current_data, current_full_data, data_Google_jobs)
 driver.close()
 driver.quit()
+
 
 # opens and writes file
 with open(filename,"w", encoding='utf-8-sig') as f:
