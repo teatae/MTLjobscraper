@@ -116,8 +116,9 @@ def taeDataCase(pUrl, current_data, current_full_data, data_Website):
     website = current_full_data[5]
     title = current_full_data[0]
 
-    current_data[1] = " ".join(((current_data[1]).strip()).split())
-    current_full_data[1] = current_data[1]
+    # uncomment if trying to remove duplicates from raw data
+    #current_data[1] = " ".join(((current_data[1]).strip()).split())
+    #current_full_data[1] = current_data[1]
 
     if (title == ""):
         print("No title linked to the following data:", current_full_data)
@@ -244,7 +245,7 @@ else:
                         data_Jobboom.append(row)
                     else:
                         print(website)
-                    ''' this is used to remove duplicates
+                    ''' this is used to remove duplicates from raw data
                                         if (website == "Indeed"):
                         taeDataCase(row[6], row[0:4], row, data_Indeed)
                     elif (website == "Jobrapido"):
@@ -384,10 +385,10 @@ while (i<cap_Indeed):
                 pUrl = ''
 
                 if post.find_elements('css selector', 'div[class="metadata salary-snippet-container"]'):
-                    pSalary = post.find_element('css selector', 'div[class="metadata salary-snippet-container"]').get_attribute("innerText").strip().replace('–',' - ')
+                    pSalary = post.find_element('css selector', 'div[class="metadata salary-snippet-container"]').get_attribute("innerText").strip().replace('–',' - ').replace('"',"'")
                     t = pSalary.split(' ')
                     if 'K' in t:
-                        t = t.replace('$', '$ ').replace('–',' - ')
+                        t = t.replace('$', '$ ')
                         pTime = t.split(' ')
                         for idx, s in enumerate(pTime):
                             if 'K' in s:
@@ -420,7 +421,7 @@ while (i<cap_Indeed):
                 if post.find_elements('css selector', "a[id^='sj_']"):
                     pUrl = post.find_element('css selector', "a[id^='sj_']").get_attribute('href')
                     if pUrl != "":
-                        current_data = [pTitle.replace('"',"'").replace('=',''),pSalary.replace('"',"'"),pCompany.replace('"',"'"),taeLocation(pLocation)]
+                        current_data = [pTitle.replace('"',"'").replace('=',''),pSalary,pCompany.replace('"',"'"),taeLocation(pLocation)]
                         rest_current_data = [(datetime.datetime.now()-datetime.timedelta(days)).strftime("%a %d %b %Y"),"Indeed",pUrl]
                         current_full_data = current_data+rest_current_data
                         taeDataCase(pUrl, current_data, current_full_data, data_Indeed)
@@ -428,7 +429,7 @@ while (i<cap_Indeed):
                     if post.find_elements('css selector', "a[id^='job_']"):
                         pUrl = post.find_element('css selector', "a[id^='job_']").get_attribute('href')
                         if pUrl != "":
-                            current_data = [pTitle.replace('"',"'").replace('=',''),pSalary.replace('"',"'"),pCompany.replace('"',"'"),taeLocation(pLocation)]
+                            current_data = [pTitle.replace('"',"'").replace('=',''),pSalary,pCompany.replace('"',"'"),taeLocation(pLocation)]
                             rest_current_data = [(datetime.datetime.now()-datetime.timedelta(days)).strftime("%a %d %b %Y"),"Indeed",pUrl]
                             current_full_data = current_data+rest_current_data
                             taeDataCase(pUrl, current_data, current_full_data, data_Indeed)
@@ -437,8 +438,9 @@ while (i<cap_Indeed):
 
 driver.close()
 driver.quit()
-        
 
+
+pSalary = ""
 i=0
 while (i<cap_Jobrapido):
     i=i+1
@@ -457,9 +459,9 @@ while (i<cap_Jobrapido):
             attempt += 1
             print("\n"+str(len(posts))+" jobs processed for page "+str(i)+", attempt #"+str(attempt))
 
+
     for post in posts:
         pTitle = ""
-        pSalary = ""
         pCompany = ""
         pLocation = ""
         pUrl = ""
@@ -483,7 +485,7 @@ while (i<cap_Jobrapido):
         daysStr = post.find("div", {"class":"result-item__date"}).text.strip()+datetime.datetime.now().strftime(" %Y")
         pUrl = post.find("a", {"class":"result-item__link"})["href"].replace('"','|')
 
-        current_data = [pTitle.replace('"',"'").replace('=',''),pSalary.replace('"',"'"),pCompany.replace('"',"'"),taeLocation(pLocation)]
+        current_data = [pTitle.replace('"',"'").replace('=',''),"",pCompany.replace('"',"'"),taeLocation(pLocation)]
         rest_current_data = [datetime.datetime.strptime(daysStr,"%d %b %Y").strftime("%a %d %b %Y"),"Jobrapido",pUrl]
         current_full_data = current_data+rest_current_data
         taeDataCase(pUrl, current_data, current_full_data, data_Jobrapido)
@@ -655,10 +657,10 @@ while (i<cap_Workopolis):
         pTitle = post.find("h2", {"class":"SerpJob-title"}).text.strip()
 
         if (len(post.findAll("span", {"class":"Salary"}))>0):
-            pSalary = post.find("span", {"class":"Salary"}).text.strip()
+            pSalary = post.find("span", {"class":"Salary"}).text.strip().replace('"',"'")
             if 'Estimated: ' in pSalary:
                 pSalary = pSalary.split('Estimated: ')
-                pSalary = str(pSalary[1])
+                pSalary = " ".join((str(pSalary[1])).split())
 
         if (len(post.findAll("div", {"class":"SerpJob-company"}))>0):
             pCompany = post.find("div", {"class":"SerpJob-company"}).text.strip()
@@ -675,12 +677,13 @@ while (i<cap_Workopolis):
 
         pUrl = "https://www.workopolis.com/jobsearch/viewjob/"+post.get('data-jobkey')
 
-        current_data = [pTitle.replace('"',"'").replace('=',''),pSalary.replace('"',"'"),pCompany.replace('"',"'"),taeLocation(pLocation)]
+        current_data = [pTitle.replace('"',"'").replace('=',''),pSalary,pCompany.replace('"',"'"),taeLocation(pLocation)]
         rest_current_data = [datetime.datetime.strptime(daysStr,"%Y-%m-%d").strftime("%a %d %b %Y"),"Workopolis",pUrl]
         current_full_data = current_data+rest_current_data
         taeDataCase(pUrl, current_data, current_full_data, data_Workopolis)
 
 
+pSalary = ""
 i=0
 while (i<cap_Jobillico):
     i=i+1
@@ -701,7 +704,6 @@ while (i<cap_Jobillico):
 
     for post in posts:
         pTitle = ""
-        pSalary = ""
         pCompany = ""
         pLocation = ""
 
@@ -739,7 +741,7 @@ while (i<cap_Jobillico):
                 if link:
                     pUrl = "https://www.jobillico.com"+link['href']
                     
-            current_data = [pTitle.replace('"',"'").replace('=',''),pSalary.replace('"',"'"),pCompany.replace('"',"'"),taeLocation(pLocation)]
+            current_data = [pTitle.replace('"',"'").replace('=',''),"",pCompany.replace('"',"'"),taeLocation(pLocation)]
             rest_current_data = [(datetime.datetime.now()-datetime.timedelta(days)).strftime("%a %d %b %Y"),"Jobillico",pUrl]
             current_full_data = current_data+rest_current_data
             taeDataCase(pUrl, current_data, current_full_data, data_Jobillico)
@@ -793,13 +795,13 @@ for post in posts:
         pTitle = post.find_element('css selector', 'h3.base-search-card__title').get_attribute("innerText").strip()
         pSalary = ""
         if post.find_elements('css selector', 'span.job-search-card__salary-info'):
-            pSalary = post.find_element('css selector', 'span.job-search-card__salary-info').get_attribute("innerText").strip()
+            pSalary = " ".join((post.find_element('css selector', 'span.job-search-card__salary-info').get_attribute("innerText").strip().replace('"',"'")).split())
         pTime = post.find_element('css selector', "time[class^='job-search-card__listdate']").get_attribute('datetime')
         pCompany = post.find_element('css selector', 'h4.base-search-card__subtitle').get_attribute("innerText").strip()
         pLocation = taeLocation(post.find_element('css selector', 'span.job-search-card__location').get_attribute("innerText").strip().replace("Quebec, Canada","QC"))
         pUrl = post.find_element('css selector', 'a.base-card__full-link').get_attribute('href')
 
-        current_data = [pTitle.replace('"',"'").replace('=',''),pSalary.replace('"',"'"),pCompany.replace('"',"'"),taeLocation(pLocation)]
+        current_data = [pTitle.replace('"',"'").replace('=',''),pSalary,pCompany.replace('"',"'"),taeLocation(pLocation)]
         rest_current_data = [datetime.datetime.strptime(pTime,"%Y-%m-%d").strftime("%a %d %b %Y"),"Linkedin",pUrl]
         current_full_data = current_data+rest_current_data
         taeDataCase(pUrl, current_data, current_full_data, data_Linkedin)
@@ -858,7 +860,7 @@ for post in posts:
         pTitle = post.find_element('css selector', 'div[data-test-id="svx-job-title"]').get_attribute("innerText").strip()
 
         if post.find_elements('css selector', 'p[data-test-id="svx-job-salary-range"]'):
-            pSalary = post.find_element('css selector', 'p[data-test-id="svx-job-salary-range"]').get_attribute("innerText").strip().replace('Per Year','a year').replace('Per Hour','an hour').replace('Per Week','a week').replace('Per Month','a month')
+            pSalary = post.find_element('css selector', 'p[data-test-id="svx-job-salary-range"]').get_attribute("innerText").strip().replace(" /"," ").replace('"',"'").replace('Per Year','a year').replace('Per Hour','an hour').replace('Per Week','a week').replace('Per Month','a month')
             pSalary = pSalary.split(' ')
             j = 0
             while j < len(pSalary):
@@ -867,7 +869,6 @@ for post in posts:
                     pSalary[j] = '$'+"{:,}".format(int(float(pSalary[j])*1000))
                 j = j + 1
             pSalary = ' '.join(pSalary)
-            pSalary = pSalary.replace(" /","")
 
         if post.find_elements('css selector', 'span[data-test-id="svx-job-date"]'):
             pTime = post.find_element('css selector', 'span[data-test-id="svx-job-date"]').get_attribute("innerText").strip()
@@ -891,7 +892,7 @@ for post in posts:
 
         pUrl = post.get_attribute('href')
 
-        current_data = [pTitle.replace('"',"'").replace('=',''),pSalary.replace('"',"'"),pCompany.replace('"',"'"),taeLocation(pLocation)]
+        current_data = [pTitle.replace('"',"'").replace('=',''),pSalary,pCompany.replace('"',"'"),taeLocation(pLocation)]
         rest_current_data = [(datetime.datetime.now()-datetime.timedelta(days)).strftime("%a %d %b %Y"),"Monster",pUrl]
         current_full_data = current_data+rest_current_data
         taeDataCase(pUrl, current_data, current_full_data, data_Monster)
@@ -899,6 +900,7 @@ driver.close()
 driver.quit()
 
 
+pSalary = ""
 i=0
 page_url = "https://www.jobboom.com/en"
 session = requests.Session()
@@ -923,7 +925,6 @@ while (i<cap_Jobboom):
         print("\n"+str(len(posts))+" jobs processed for page "+str(i)+", attempt #"+str(attempt))
 
     for post in posts:
-        pSalary = ""
         pCompany = ""
         pLocation = ""
 
@@ -945,7 +946,7 @@ while (i<cap_Jobboom):
 
         pUrl = "https://www.jobboom.com"+link_title['href']
 
-        current_data = [pTitle.replace('"',"'").replace('=',''),pSalary.replace('"',"'"),pCompany.replace('"',"'"),taeLocation(pLocation)]
+        current_data = [pTitle.replace('"',"'").replace('=',''),"",pCompany.replace('"',"'"),taeLocation(pLocation)]
         rest_current_data = [(datetime.datetime.now()).strftime("%a %d %b %Y"),"Jobboom",pUrl]
         current_full_data = current_data+rest_current_data
         taeDataCase(pUrl, current_data, current_full_data, data_Jobboom)
@@ -1074,14 +1075,13 @@ if driver.find_elements('css selector', "input.gLFyf.gsfi"):
         post = post.get_attribute("innerText").strip()
         title_company_location = []
         time_salary = []
+        pSalary = ''
 
         if len(post.split('\nvia '))==2:
             title_company_location = (post.split('\nvia ')[0]).split('\n')
             time_salary = (post.split('\nvia ')[1]).split('\n')
 
         if len(title_company_location)>2:
-            pSalary = ''
-
             if len(title_company_location[0])==1:
                 if len(title_company_location)==4:
                     pTitle = title_company_location[1]
@@ -1107,7 +1107,6 @@ if driver.find_elements('css selector', "input.gLFyf.gsfi"):
                 pUrl = 'unknown search of '+pTitle+' for '+pCompany
             
             days = 0
-            pSalary = ''
             for t in time_salary:
                 if 'ago' in t:
                     if 'month' in t:
@@ -1128,11 +1127,11 @@ if driver.find_elements('css selector', "input.gLFyf.gsfi"):
                                 if 'K' in s:
                                     pTime[idx] = str(int(float(s.replace('K',''))*1000))
 
-                            pSalary = ' '.join(pTime).replace('$ ', '$')
+                            pSalary = ' '.join(pTime).replace('$ ', '$').replace('"',"'")
                         else:
-                            pSalary = t.replace('–',' - ')
+                            pSalary = t.replace('–',' - ').replace('"',"'")
 
-            current_data = [pTitle.replace('"',"'").replace('=',''),pSalary.replace('"',"'"),pCompany.replace('"',"'"),taeLocation(pLocation)]
+            current_data = [pTitle.replace('"',"'").replace('=',''),pSalary,pCompany.replace('"',"'"),taeLocation(pLocation)]
             rest_current_data = [(datetime.datetime.now()-datetime.timedelta(days)).strftime("%a %d %b %Y"),"Google jobs",pUrl]
             current_full_data = current_data+rest_current_data
             taeDataCase(pUrl, current_data, current_full_data, data_Google_jobs)
