@@ -9,6 +9,7 @@ import shutil
 import os
 import requests
 from selenium import webdriver
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
@@ -44,11 +45,11 @@ data_Indeed_writer = []
 data_Jobrapido = []
 data_Jobrapido_writer = []
 
-data_Stackoverflow = []
-data_Stackoverflow_writer = []
+#data_Stackoverflow = []
+#data_Stackoverflow_writer = []
 
-data_Eluta = []
-data_Eluta_writer = []
+#data_Eluta = []
+#data_Eluta_writer = []
 
 data_Linkedin = []
 data_Linkedin_writer = []
@@ -65,8 +66,8 @@ data_Jobillico_writer = []
 data_Google_jobs = []
 data_Google_jobs_writer = []
 
-data_Facebook = []
-data_Facebook_writer = []
+#data_Facebook = []
+#data_Facebook_writer = []
 
 data_Jobboom = []
 data_Jobboom_writer = []
@@ -113,41 +114,39 @@ def taePopUrls(data_Website, pUrl):
 #current_date is [Title, Salary, Company, Location]
 #current_full_data is [Title, Salary, Company, Location, Date, Website, URL]
 def taeDataCase(pUrl, current_data, current_full_data, data_Website):
-    website = current_full_data[5]
-    title = current_full_data[0]
-
+    # current_full_data[5] is website name
+    # current_full_data[0] is title
     # uncomment if trying to remove duplicates from raw data
     #current_data[1] = " ".join(((current_data[1]).strip()).split())
     #current_full_data[1] = current_data[1]
 
-    if (title == ""):
+    if (current_full_data[0] == ""): # title not empty
         print("No title linked to the following data:", current_full_data)
     elif [pUrl] not in getSubData(6, 7, data_Website):         #URL does not exist
         if current_data not in getSubData(0, 4, data_Website): #Data does not exist
             taeAdd(data_Website, current_full_data)
-            print("New data",website)
+            print("New data",current_full_data[5])
         else:                                                  #Data exist
             taePopData(data_Website, current_data)
             taeAdd(data_Website, current_full_data)
-            print("Updating URL",website)
+            print("Updating URL",current_full_data[5])
     else:                                                      #URL exist
         if current_data not in getSubData(0, 4, data_Website): #Data does not exist
             taePopUrls(data_Website, pUrl)
             taeAdd(data_Website, current_full_data)
-            print("Updating data",website)
+            print("Updating data",current_full_data[5])
         else:                                                  #Data exist
-            print("Duplicate",website)
+            print("Duplicate",current_full_data[5])
 
 #fixs most string errors
 def taeLocation(pLocation):
-    location = pLocation.replace('"',"'").replace(',','').replace('â','a').replace('ô','o').replace('Ã©','e').replace('é','e').replace('É','e').replace('è','e').replace('Ã´','o').replace('.','').replace('’',"'").replace('´',"'").replace("(","").replace(")","").replace("  "," ").replace("| ","").replace("/ ","").replace("–","-")
+    location = pLocation.replace('"',"'").replace(',',' ').replace('â','a').replace('ô','o').replace('Ã©','e').replace('é','e').replace('É','e').replace('è','e').replace('Ã´','o').replace('.',' ').replace('’',"'").replace('´',"'").replace("("," ").replace(")"," ").replace("|"," ").replace("/"," ").replace("–","-").replace(" -","-").replace("- ","-").replace("  "," ")
     location = location.replace('St ','Saint ').replace('Ste ','Sainte ').replace('St-','Saint-').replace('Ste-','Sainte-')
     location = location.replace("Niagara On The Lake","Niagara-on-the-Lake").replace('Barrys Bay',"Barry's Bay").replace('Burks Falls',"Burk's Falls").replace('Lions Head',"Lion's Head").replace("Greater Toronto Area Canada","Greater Toronto Area ON")
     location = location.replace('Cote-Saint-Luc','Cote Saint-Luc').replace('Dollard-Des-Ormeaux','Dollard-Des Ormeaux').replace('Dollard-des-Ormeaux','Dollard-Des Ormeaux').replace("Kitchener-Waterloo","Kitchener")
-    location = location.replace('Saint-Lin - Laurentides','Saint-Lin-Laurentides').replace('Saint-Lin/Laurentides','Saint-Lin-Laurentides').replace('Saint-Lin--Laurentides','Saint-Lin-Laurentides').replace('Saint-Lin ','Saint-Lin-Laurentides ')
-    location = location.replace("MONTREAL","Montreal").replace("Montreal (St Laurent)","Saint-Laurent").replace("MISSISSAUGA","Mississauga").replace("Mississauga Canada","Mississauga ON").replace("Blue Mountain ","Blue Mountains ").replace("The Blue Mountains ","Blue Mountains ")
-    location = location.replace("Mississauga CA","Mississauga ON").replace("Greater Montreal Area QC","Montreal QC").replace("Greater Montreal QC","Montreal QC").replace("Lasalle","LaSalle").replace("Saint Laurent", "Saint-Laurent")
-    location = location.replace("Montreal CA","Montreal QC").replace(" -","-").replace("- ","-")
+    location = location.replace("MONTREAL","Montreal").replace("MISSISSAUGA","Mississauga").replace("Montreal St Laurent ","Saint-Laurent").replace("Mississauga Canada","Mississauga ON")
+    location = location.replace("Mississauga CA","Mississauga ON").replace("Greater Montreal Area","Montreal").replace("Greater Montreal","Montreal").replace("Saint Laurent", "Saint-Laurent")
+    location = location.replace("Montreal CA","Montreal QC")
     location = location.split(" +1 ")[0]
     if (len(location.split(" "))>2) and ("Montreal" in (location.split(" "))) and ("Old" not in location) and ("Nord" not in location) and ("city" not in location):
         location = location.split(" ")
@@ -165,7 +164,7 @@ def taeLocation(pLocation):
         location = "Quebec"
     if location == "QC QC":
         location = "Quebec"
-    return location.replace("  "," ")
+    return location
 
 #removes all data more than 42 days old (6 weeks)
 #sorts the data from newest to oldest date
@@ -215,7 +214,7 @@ else:
         line_count = 0
         for row in csv_reader:
             if line_count == 0:
-                print("Column names are "+(",".join(row)))
+                print('Column names are '+(','.join(row)))
                 line_count += 1
             else:
                 website = ''.join(row[5:6])
@@ -225,10 +224,10 @@ else:
                         data_Indeed.append(row)
                     elif (website == "Jobrapido"):
                         data_Jobrapido.append(row)
-                    elif (website == "Stackoverflow"):
-                        data_Stackoverflow.append(row)
-                    elif (website == "Eluta"):
-                        data_Eluta.append(row)
+#                    elif (website == "Stackoverflow"):
+#                        data_Stackoverflow.append(row)
+#                    elif (website == "Eluta"):
+#                        data_Eluta.append(row)
                     elif (website == "Linkedin"):
                         data_Linkedin.append(row)
                     elif (website == "Monster"):
@@ -239,8 +238,8 @@ else:
                         data_Jobillico.append(row)
                     elif (website == "Google jobs"):
                         data_Google_jobs.append(row)
-                    elif (website == "Facebook"):
-                        data_Facebook.append(row)
+#                    elif (website == "Facebook"):
+#                        data_Facebook.append(row)
                     elif (website == "Jobboom"):
                         data_Jobboom.append(row)
                     else:
@@ -275,7 +274,8 @@ else:
         csv_file.close()
     print(str(line_count)+" lines are being processed")
 
-    data_lines = len(data_Indeed) + len(data_Jobrapido) + len(data_Stackoverflow) + len(data_Eluta) + len(data_Linkedin) + len(data_Monster) + len(data_Workopolis) + len(data_Jobillico) + len(data_Google_jobs) + len(data_Facebook) + len(data_Jobboom)
+    #data_lines = len(data_Indeed) + len(data_Jobrapido) + len(data_Stackoverflow) + len(data_Eluta) + len(data_Linkedin) + len(data_Monster) + len(data_Workopolis) + len(data_Jobillico) + len(data_Google_jobs) + len(data_Facebook) + len(data_Jobboom)
+    data_lines = len(data_Indeed) + len(data_Jobrapido) + len(data_Linkedin) + len(data_Monster) + len(data_Workopolis) + len(data_Jobillico) + len(data_Google_jobs) + len(data_Jobboom)
     if (data_lines==0):
         print("File exists but no data, tables are empty and initialized")
     else:
@@ -283,10 +283,10 @@ else:
             print("First full_data in the table is ",str(data_Indeed[0]).encode().decode())
         elif (len(data_Jobrapido)>0):
             print("First full_data in the table is ",str(data_Jobrapido[0]).encode().decode())
-        elif (len(data_Stackoverflow)>0):
-            print("First full_data in the table is ",str(data_Stackoverflow[0]).encode().decode())
-        elif (len(data_Eluta)>0):
-            print("First full_data in the table is ",str(data_Eluta[0]).encode().decode())
+#        elif (len(data_Stackoverflow)>0):
+#            print("First full_data in the table is ",str(data_Stackoverflow[0]).encode().decode())
+#        elif (len(data_Eluta)>0):
+#            print("First full_data in the table is ",str(data_Eluta[0]).encode().decode())
         elif (len(data_Linkedin)>0):
             print("First full_data in the table is ",str(data_Linkedin[0]).encode().decode())
         elif (len(data_Monster)>0):
@@ -297,8 +297,8 @@ else:
             print("First full_data in the table is ",str(data_Jobillico[0]).encode().decode())
         elif (len(data_Google_jobs) >0):
             print("First full_data in the table is ",str(data_Google_jobs[0]).encode().decode())
-        elif (len(data_Facebook)>0):
-            print("First full_data in the table is ",str(data_Facebook[0]).encode().decode())
+#        elif (len(data_Facebook)>0):
+#            print("First full_data in the table is ",str(data_Facebook[0]).encode().decode())
         elif (len(data_Jobboom)>0):
             print("First full_data in the table is ",str(data_Jobboom[0]).encode().decode())
         else:
@@ -335,11 +335,11 @@ cap_Indeed = 25 #25
 cap_Jobrapido = 32 #32
 #cap_Stackoverflow = 2 #2
 #cap_Eluta = 100 #100
-cap_Workopolis = 50 #50
-cap_Jobillico = 60 #60
+cap_Workopolis = 5 #50
+cap_Jobillico = 30 #30
 cap_Linkedin = 50 #50
-cap_Monster = 20 #20
-cap_Jobboom = 60 #60
+cap_Monster = 15 #15
+cap_Jobboom = 30 #60
 #cap_Facebook = 40 #40
 cap_Google_jobs = 30 #30
 
@@ -372,20 +372,20 @@ while (i<cap_Indeed):
             print("\n"+str(len(posts))+" jobs processed for page "+str(i)+", attempt #"+str(attempt))
 
         for post in posts:
-            pTitle = ""
+            pTitle = ''
             titles = post.find_elements('tag name', 'span')
             for title in titles:
                 if title.get_attribute('title') != "":
                     pTitle = title.get_attribute('title')
             
-            if pTitle != "":
+            if pTitle != '':
                 pSalary = ''
                 pCompany = ''
                 pLocation = ''
                 pUrl = ''
 
                 if post.find_elements('css selector', 'div[class="metadata salary-snippet-container"]'):
-                    pSalary = post.find_element('css selector', 'div[class="metadata salary-snippet-container"]').get_attribute("innerText").strip().replace('–',' - ').replace('"',"'")
+                    pSalary = post.find_element('css selector', 'div[class="metadata salary-snippet-container"]').get_attribute("innerText").replace('–',' - ').replace('"',"'").strip()
                     t = pSalary.split(' ')
                     if 'K' in t:
                         t = t.replace('$', '$ ')
@@ -409,7 +409,7 @@ while (i<cap_Indeed):
                         pCompany = post.find_element('css selector', 'span[class="companyName"]').get_attribute("innerText").strip()
 
                 if post.find_elements('css selector', 'div[class="companyLocation"]'):
-                    pLocation = taeLocation(post.find_element('css selector', 'div[class="companyLocation"]').get_attribute("innerText").strip()).strip()
+                    pLocation = taeLocation(post.find_element('css selector', 'div[class="companyLocation"]').get_attribute("innerText").strip())
                     if "+" in pLocation:
                         pLocation = pLocation.split("+")
                         pLocation = str(pLocation[0])
@@ -420,19 +420,16 @@ while (i<cap_Indeed):
 
                 if post.find_elements('css selector', "a[id^='sj_']"):
                     pUrl = post.find_element('css selector', "a[id^='sj_']").get_attribute('href')
-                    if pUrl != "":
-                        current_data = [pTitle.replace('"',"'").replace('=',''),pSalary,pCompany.replace('"',"'"),taeLocation(pLocation)]
-                        rest_current_data = [(datetime.datetime.now()-datetime.timedelta(days)).strftime("%a %d %b %Y"),"Indeed",pUrl]
-                        current_full_data = current_data+rest_current_data
-                        taeDataCase(pUrl, current_data, current_full_data, data_Indeed)
                 else:
                     if post.find_elements('css selector', "a[id^='job_']"):
                         pUrl = post.find_element('css selector', "a[id^='job_']").get_attribute('href')
-                        if pUrl != "":
-                            current_data = [pTitle.replace('"',"'").replace('=',''),pSalary,pCompany.replace('"',"'"),taeLocation(pLocation)]
-                            rest_current_data = [(datetime.datetime.now()-datetime.timedelta(days)).strftime("%a %d %b %Y"),"Indeed",pUrl]
-                            current_full_data = current_data+rest_current_data
-                            taeDataCase(pUrl, current_data, current_full_data, data_Indeed)
+
+                if pUrl != "":
+                    current_data = [pTitle.replace('"',"'").replace('=',''),pSalary,pCompany.replace('"',"'"),taeLocation(pLocation)]
+                    taeDataCase(pUrl, current_data, current_data+[(datetime.datetime.now()-datetime.timedelta(days)).strftime("%a %d %b %Y"),'Indeed',pUrl], data_Indeed)
+    except TimeoutException:
+        attempt += 1
+        print("\n page "+str(i)+", attempt #"+str(attempt)+" is unsucessful")
     finally:
         i=i+1
 
@@ -455,16 +452,19 @@ while (i<cap_Jobrapido):
             page_soup = soup(webpage.decode('utf-8-sig'),"html.parser")
             page_soup.prettify()
             posts = page_soup.findAll("div", {"class": "result-item__wrapper"})
+        except TimeoutException:
+            attempt += 1
+            print("\n page "+str(i)+", attempt #"+str(attempt)+" is unsucessful")
         finally:
             attempt += 1
             print("\n"+str(len(posts))+" jobs processed for page "+str(i)+", attempt #"+str(attempt))
 
 
     for post in posts:
-        pTitle = ""
-        pCompany = ""
-        pLocation = ""
-        pUrl = ""
+        pTitle = ''
+        pCompany = ''
+        pLocation = ''
+        pUrl = ''
 
         pTitle = post.find("div", {"class":"result-item__title"}).text.strip()
 
@@ -474,7 +474,7 @@ while (i<cap_Jobrapido):
         if (len(post.findAll("span", {"class":"result-item__location-label"}))>0):
             pLocation = post.find("span", {"class":"result-item__location-label"}).text.strip()
             if "(" in pLocation:
-                pLocation = taeLocation(pLocation.replace('(',' ').replace(')',' ').replace("Saint Laurent","Saint-Laurent").replace("Montreal",""))
+                pLocation = taeLocation(pLocation.replace("Montreal",""))
                 pLocation = pLocation.replace("Est","Montreal-Est").replace("Ouest","Montreal-Ouest").replace("Nord","Montreal-Nord")
                 pLocation = pLocation.split(" ")
                 pLocation[:] = [x for x in pLocation if x]
@@ -486,9 +486,7 @@ while (i<cap_Jobrapido):
         pUrl = post.find("a", {"class":"result-item__link"})["href"].replace('"','|')
 
         current_data = [pTitle.replace('"',"'").replace('=',''),"",pCompany.replace('"',"'"),taeLocation(pLocation)]
-        rest_current_data = [datetime.datetime.strptime(daysStr,"%d %b %Y").strftime("%a %d %b %Y"),"Jobrapido",pUrl]
-        current_full_data = current_data+rest_current_data
-        taeDataCase(pUrl, current_data, current_full_data, data_Jobrapido)
+        taeDataCase(pUrl, current_data, current_data+[datetime.datetime.strptime(daysStr,"%d %b %Y").strftime("%a %d %b %Y"),"Jobrapido",pUrl], data_Jobrapido)
 '''
 i=0
 while (i<cap_Stackoverflow):
@@ -628,11 +626,13 @@ while (i<cap_Eluta):
             rest_current_data = [(datetime.datetime.now()-datetime.timedelta(days)).strftime("%a %d %b %Y"),"Eluta",pUrl]
             current_full_data = current_data+rest_current_data
             taeDataCase(pUrl, current_data, current_full_data, data_Eluta)
-'''
+
+
+
 i=0
 while (i<cap_Workopolis):
     i=i+1
-    page_url = "https://www.workopolis.com/jobsearch/find-jobs?ak=&l=montreal&st=true&lg=en&pn="+str(i)
+    page_url = "https://www.workopolis.com/jobsearch/find-jobs?ak=&l=montreal&s=d&lg=en&pn="+str(i)
     posts = []
     attempt = 0
     while (attempt < max_attempts and len(posts)==0):
@@ -643,15 +643,18 @@ while (i<cap_Workopolis):
             page_soup = soup(webpage.decode('utf-8-sig'),"html.parser")
             page_soup.prettify()
             posts = page_soup.find_all("article", {"class":"SerpJob"})
+        except TimeoutException:
+            attempt += 1
+            print("\n page "+str(i)+", attempt #"+str(attempt)+" is unsucessful")
         finally:
             attempt += 1
             print("\n"+str(len(posts))+" jobs processed for page "+str(i)+", attempt #"+str(attempt))
 
     for post in posts:
-        pTitle = ""
-        pSalary = ""
-        pCompany = ""
-        pLocation = ""
+        pTitle = ''
+        pSalary = ''
+        pCompany = ''
+        pLocation = ''
 
         daysStr = datetime.datetime.strftime(datetime.datetime.now(),"%Y-%m-%d")
         pTitle = post.find("h2", {"class":"SerpJob-title"}).text.strip()
@@ -678,12 +681,10 @@ while (i<cap_Workopolis):
         pUrl = "https://www.workopolis.com/jobsearch/viewjob/"+post.get('data-jobkey')
 
         current_data = [pTitle.replace('"',"'").replace('=',''),pSalary,pCompany.replace('"',"'"),taeLocation(pLocation)]
-        rest_current_data = [datetime.datetime.strptime(daysStr,"%Y-%m-%d").strftime("%a %d %b %Y"),"Workopolis",pUrl]
-        current_full_data = current_data+rest_current_data
-        taeDataCase(pUrl, current_data, current_full_data, data_Workopolis)
+        taeDataCase(pUrl, current_data, current_data+[datetime.datetime.strptime(daysStr,"%Y-%m-%d").strftime("%a %d %b %Y"),"Workopolis",pUrl], data_Workopolis)
+'''
 
-
-pSalary = ""
+pSalary = ''
 i=0
 while (i<cap_Jobillico):
     i=i+1
@@ -698,14 +699,17 @@ while (i<cap_Jobillico):
             page_soup = soup(webpage.decode('utf-8-sig'),"html.parser")
             page_soup.prettify()
             posts = page_soup.find_all("article", ref=lambda x: x and x.startswith("job"))
+        except TimeoutException:
+            attempt += 1
+            print("\n page "+str(i)+", attempt #"+str(attempt)+" is unsucessful")
         finally:
             attempt += 1
             print("\n"+str(len(posts))+" jobs processed for page "+str(i)+", attempt #"+str(attempt))
 
     for post in posts:
-        pTitle = ""
-        pCompany = ""
-        pLocation = ""
+        pTitle = ''
+        pCompany = ''
+        pLocation = ''
 
         if (len(post.findAll("h2", {"class":"h3 pr4"}))>0):
             pTitle = post.find("h2", {"class":"h3 pr4"}).text.strip()
@@ -742,9 +746,7 @@ while (i<cap_Jobillico):
                     pUrl = "https://www.jobillico.com"+link['href']
                     
             current_data = [pTitle.replace('"',"'").replace('=',''),"",pCompany.replace('"',"'"),taeLocation(pLocation)]
-            rest_current_data = [(datetime.datetime.now()-datetime.timedelta(days)).strftime("%a %d %b %Y"),"Jobillico",pUrl]
-            current_full_data = current_data+rest_current_data
-            taeDataCase(pUrl, current_data, current_full_data, data_Jobillico)
+            taeDataCase(pUrl, current_data, current_data+[(datetime.datetime.now()-datetime.timedelta(days)).strftime("%a %d %b %Y"),"Jobillico",pUrl], data_Jobillico)
 
 
 #infinite scrolling website, we need to use selenium to scroll these pages and then pull the data
@@ -802,9 +804,7 @@ for post in posts:
         pUrl = post.find_element('css selector', 'a.base-card__full-link').get_attribute('href')
 
         current_data = [pTitle.replace('"',"'").replace('=',''),pSalary,pCompany.replace('"',"'"),taeLocation(pLocation)]
-        rest_current_data = [datetime.datetime.strptime(pTime,"%Y-%m-%d").strftime("%a %d %b %Y"),"Linkedin",pUrl]
-        current_full_data = current_data+rest_current_data
-        taeDataCase(pUrl, current_data, current_full_data, data_Linkedin)
+        taeDataCase(pUrl, current_data, current_data+[datetime.datetime.strptime(pTime,"%Y-%m-%d").strftime("%a %d %b %Y"),"Linkedin",pUrl], data_Linkedin)
 driver.close()
 driver.quit()
 
@@ -893,14 +893,12 @@ for post in posts:
         pUrl = post.get_attribute('href')
 
         current_data = [pTitle.replace('"',"'").replace('=',''),pSalary,pCompany.replace('"',"'"),taeLocation(pLocation)]
-        rest_current_data = [(datetime.datetime.now()-datetime.timedelta(days)).strftime("%a %d %b %Y"),"Monster",pUrl]
-        current_full_data = current_data+rest_current_data
-        taeDataCase(pUrl, current_data, current_full_data, data_Monster)
+        taeDataCase(pUrl, current_data, current_data+[(datetime.datetime.now()-datetime.timedelta(days)).strftime("%a %d %b %Y"),"Monster",pUrl], data_Monster)
 driver.close()
 driver.quit()
 
 
-pSalary = ""
+pSalary = ''
 i=0
 page_url = "https://www.jobboom.com/en"
 session = requests.Session()
@@ -925,8 +923,8 @@ while (i<cap_Jobboom):
         print("\n"+str(len(posts))+" jobs processed for page "+str(i)+", attempt #"+str(attempt))
 
     for post in posts:
-        pCompany = ""
-        pLocation = ""
+        pCompany = ''
+        pLocation = ''
 
         link_title = post.find("p", {"class":"offre"}).find("a", href=True)
         pTitle = link_title['title']
@@ -947,9 +945,7 @@ while (i<cap_Jobboom):
         pUrl = "https://www.jobboom.com"+link_title['href']
 
         current_data = [pTitle.replace('"',"'").replace('=',''),"",pCompany.replace('"',"'"),taeLocation(pLocation)]
-        rest_current_data = [(datetime.datetime.now()).strftime("%a %d %b %Y"),"Jobboom",pUrl]
-        current_full_data = current_data+rest_current_data
-        taeDataCase(pUrl, current_data, current_full_data, data_Jobboom)
+        taeDataCase(pUrl, current_data, current_data+[(datetime.datetime.now()).strftime("%a %d %b %Y"),"Jobboom",pUrl], data_Jobboom)
 session.close()
 
 '''
@@ -1132,9 +1128,7 @@ if driver.find_elements('css selector', "input.gLFyf.gsfi"):
                             pSalary = t.replace('–',' - ').replace('"',"'")
 
             current_data = [pTitle.replace('"',"'").replace('=',''),pSalary,pCompany.replace('"',"'"),taeLocation(pLocation)]
-            rest_current_data = [(datetime.datetime.now()-datetime.timedelta(days)).strftime("%a %d %b %Y"),"Google jobs",pUrl]
-            current_full_data = current_data+rest_current_data
-            taeDataCase(pUrl, current_data, current_full_data, data_Google_jobs)
+            taeDataCase(pUrl, current_data, current_data+[(datetime.datetime.now()-datetime.timedelta(days)).strftime("%a %d %b %Y"),"Google jobs",pUrl], data_Google_jobs)
 driver.close()
 driver.quit()
 
