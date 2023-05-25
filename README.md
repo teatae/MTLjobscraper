@@ -11,7 +11,5 @@ Check chrome version top right of browser -> help -> google chrome driver:
 ##### Get Win32 zip
 
 pip install --upgrade pip  
-
 pip install selenium  
-
 py -m pip install selenium webdriver-manager  
