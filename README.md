@@ -9,7 +9,3 @@ Check chrome version top right of browser -> help -> google chrome driver:
 ===================================================================
 
 ##### Get Win32 zip
-
-I prevented Google Chrome from updating by
-renaming the Update folder into UpdateSTOP in
-C:\Program Files (x86)\Google
