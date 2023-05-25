@@ -8,7 +8,12 @@ import sys
 import shutil
 import os
 import requests
+import undetected_chromedriver as uc
+
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service as ChromeService
+from webdriver_manager.chrome import ChromeDriverManager
+
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
@@ -45,11 +50,8 @@ data_Indeed_writer = []
 data_Jobrapido = []
 data_Jobrapido_writer = []
 
-#data_Stackoverflow = []
-#data_Stackoverflow_writer = []
-
-#data_Eluta = []
-#data_Eluta_writer = []
+data_Eluta = []
+data_Eluta_writer = []
 
 data_Linkedin = []
 data_Linkedin_writer = []
@@ -65,9 +67,6 @@ data_Jobillico_writer = []
 
 data_Google_jobs = []
 data_Google_jobs_writer = []
-
-#data_Facebook = []
-#data_Facebook_writer = []
 
 data_Jobboom = []
 data_Jobboom_writer = []
@@ -224,10 +223,8 @@ else:
                         data_Indeed.append(row)
                     elif (website == "Jobrapido"):
                         data_Jobrapido.append(row)
-#                    elif (website == "Stackoverflow"):
-#                        data_Stackoverflow.append(row)
-#                    elif (website == "Eluta"):
-#                        data_Eluta.append(row)
+                    elif (website == "Eluta"):
+                        data_Eluta.append(row)
                     elif (website == "Linkedin"):
                         data_Linkedin.append(row)
                     elif (website == "Monster"):
@@ -238,44 +235,15 @@ else:
                         data_Jobillico.append(row)
                     elif (website == "Google jobs"):
                         data_Google_jobs.append(row)
-#                    elif (website == "Facebook"):
-#                        data_Facebook.append(row)
                     elif (website == "Jobboom"):
                         data_Jobboom.append(row)
                     else:
                         print(website)
-                    ''' this is used to remove duplicates from raw data
-                                        if (website == "Indeed"):
-                        taeDataCase(row[6], row[0:4], row, data_Indeed)
-                    elif (website == "Jobrapido"):
-                        taeDataCase(row[6], row[0:4], row, data_Jobrapido)
-                    elif (website == "Stackoverflow"):
-                        taeDataCase(row[6], row[0:4], row, data_Stackoverflow)
-                    elif (website == "Eluta"):
-                        taeDataCase(row[6], row[0:4], row, data_Eluta)
-                    elif (website == "Linkedin"):
-                        taeDataCase(row[6], row[0:4], row, data_Linkedin)
-                    elif (website == "Monster"):
-                        taeDataCase(row[6], row[0:4], row, data_Monster)
-                    elif (website == "Workopolis"):
-                        taeDataCase(row[6], row[0:4], row, data_Workopolis)
-                    elif (website == "Jobillico"):
-                        taeDataCase(row[6], row[0:4], row, data_Jobillico)
-                    elif (website == "Google jobs"):
-                        taeDataCase(row[6], row[0:4], row, data_Google_jobs)
-                    elif (website == "Facebook"):
-                        taeDataCase(row[6], row[0:4], row, data_Facebook)
-                    elif (website == "Jobboom"):
-                        taeDataCase(row[6], row[0:4], row, data_Jobboom)
-                    else:
-                        print(website)
-                    '''
                 line_count += 1
         csv_file.close()
     print(str(line_count)+" lines are being processed")
 
-    #data_lines = len(data_Indeed) + len(data_Jobrapido) + len(data_Stackoverflow) + len(data_Eluta) + len(data_Linkedin) + len(data_Monster) + len(data_Workopolis) + len(data_Jobillico) + len(data_Google_jobs) + len(data_Facebook) + len(data_Jobboom)
-    data_lines = len(data_Indeed) + len(data_Jobrapido) + len(data_Linkedin) + len(data_Monster) + len(data_Workopolis) + len(data_Jobillico) + len(data_Google_jobs) + len(data_Jobboom)
+    data_lines = len(data_Indeed) + len(data_Jobrapido) + len(data_Eluta) + len(data_Linkedin) + len(data_Monster) + len(data_Workopolis) + len(data_Jobillico) + len(data_Google_jobs) + len(data_Jobboom)
     if (data_lines==0):
         print("File exists but no data, tables are empty and initialized")
     else:
@@ -283,10 +251,8 @@ else:
             print("First full_data in the table is ",str(data_Indeed[0]).encode().decode())
         elif (len(data_Jobrapido)>0):
             print("First full_data in the table is ",str(data_Jobrapido[0]).encode().decode())
-#        elif (len(data_Stackoverflow)>0):
-#            print("First full_data in the table is ",str(data_Stackoverflow[0]).encode().decode())
-#        elif (len(data_Eluta)>0):
-#            print("First full_data in the table is ",str(data_Eluta[0]).encode().decode())
+        elif (len(data_Eluta)>0):
+            print("First full_data in the table is ",str(data_Eluta[0]).encode().decode())
         elif (len(data_Linkedin)>0):
             print("First full_data in the table is ",str(data_Linkedin[0]).encode().decode())
         elif (len(data_Monster)>0):
@@ -297,8 +263,6 @@ else:
             print("First full_data in the table is ",str(data_Jobillico[0]).encode().decode())
         elif (len(data_Google_jobs) >0):
             print("First full_data in the table is ",str(data_Google_jobs[0]).encode().decode())
-#        elif (len(data_Facebook)>0):
-#            print("First full_data in the table is ",str(data_Facebook[0]).encode().decode())
         elif (len(data_Jobboom)>0):
             print("First full_data in the table is ",str(data_Jobboom[0]).encode().decode())
         else:
@@ -308,56 +272,55 @@ else:
 '''
 cap_Indeed = 0 #25
 cap_Jobrapido = 0 #32
-cap_Stackoverflow = 0 #2
 cap_Eluta = 0 #100
 cap_Workopolis = 0 #50
 cap_Jobillico = 0 #60
 cap_Linkedin = 0 #50
 cap_Monster = 0 #50
 cap_Jobboom = 0 #60
-cap_Facebook = 0 #40
 cap_Google_jobs = 0 #30
 
 cap_Indeed = 25 #25
 cap_Jobrapido = 32 #32
-cap_Stackoverflow = 2 #2
 cap_Eluta = 100 #100
 cap_Workopolis = 50 #50
 cap_Jobillico = 60 #60
 cap_Linkedin = 50 #50
 cap_Monster = 50 #50
 cap_Jobboom = 60 #60
-cap_Facebook = 40 #40
 cap_Google_jobs = 30 #30
-'''
 
 cap_Indeed = 25 #25
 cap_Jobrapido = 32 #32
-#cap_Stackoverflow = 2 #2
 #cap_Eluta = 100 #100
 cap_Workopolis = 5 #50
 cap_Jobillico = 30 #30
 cap_Linkedin = 50 #50
 cap_Monster = 15 #15
 cap_Jobboom = 30 #60
-#cap_Facebook = 40 #40
 cap_Google_jobs = 30 #30
+'''
+
+cap_Indeed = 25 #25
+cap_Jobrapido = 32 #32
+cap_Jobillico = 30 #30
+cap_Linkedin = 50 #50
+cap_Monster = 15 #15
+cap_Jobboom = 60 #60
 
 max_attempts = 2
 
-options = webdriver.ChromeOptions()
-options.add_experimental_option('excludeSwitches', ['enable-logging'])
-
+options = uc.ChromeOptions()
 options.headless = False
-ser = Service("E:\\chromedriver_win32\\chromedriver.exe")
-driver = webdriver.Chrome(service=ser, options = options)
+driver = uc.Chrome(use_subprocess=True, options=options)
 
-page_url_Indeed = "https://ca.indeed.com/jobs?q=&l=Montreal%2C+QC"
+page_url_Indeed = "https://ca.indeed.com/jobs?q=&l=Montr%C3%A9al%2C%20QC"
 driver.get(page_url_Indeed)
 i=0
+attempt = 0
 
 while (i<cap_Indeed):
-    page_url_Indeed = "https://ca.indeed.com/jobs?q=&l=Montreal%2C+QC&limit=50&sort=date&start="+str(50*i)
+    page_url_Indeed = "https://ca.indeed.com/jobs?q=&l=Montr%C3%A9al%2C%20QC&sort=date&limit=50&start="+str(50*i)
     driver.get(page_url_Indeed)
 
     try:
@@ -437,7 +400,7 @@ driver.close()
 driver.quit()
 
 
-pSalary = ""
+pSalary = ''
 i=0
 while (i<cap_Jobrapido):
     i=i+1
@@ -487,74 +450,266 @@ while (i<cap_Jobrapido):
 
         current_data = [pTitle.replace('"',"'").replace('=',''),"",pCompany.replace('"',"'"),taeLocation(pLocation)]
         taeDataCase(pUrl, current_data, current_data+[datetime.datetime.strptime(daysStr,"%d %b %Y").strftime("%a %d %b %Y"),"Jobrapido",pUrl], data_Jobrapido)
-'''
+
+
+pSalary = ''
 i=0
-while (i<cap_Stackoverflow):
+while (i<cap_Jobillico):
     i=i+1
-    page_url = "https://stackoverflow.com/jobs?l=montreal&d=20&u=Km&sort=p&pg="+str(i)
+    page_url = "https://www.jobillico.com/search-jobs?skwd=&scty=Montreal%2C%20QC&icty=6185&mfil=15&sort=date&ipg="+str(i)
     posts = []
     attempt = 0
     while (attempt < max_attempts and len(posts)==0):
         req = Request(page_url, headers={'User-Agent': 'Mozilla/5.0'})
-        webpage = urlopen(req, timeout = 15).read()
+        try:
+            webpage = urlopen(req, timeout = 15).read()
+            time.sleep(2)
+            page_soup = soup(webpage.decode('utf-8-sig'),"html.parser")
+            page_soup.prettify()
+            posts = page_soup.find_all("article", ref=lambda x: x and x.startswith("job"))
+        except TimeoutException:
+            attempt += 1
+            print("\n page "+str(i)+", attempt #"+str(attempt)+" is unsucessful")
+        finally:
+            attempt += 1
+            print("\n"+str(len(posts))+" jobs processed for page "+str(i)+", attempt #"+str(attempt))
+
+    for post in posts:
+        pTitle = ''
+        pCompany = ''
+        pLocation = ''
+
+        if (len(post.findAll("h2", {"class":"h3 pr4"}))>0):
+            pTitle = post.find("h2", {"class":"h3 pr4"}).text.strip()
+
+            if (len(post.findAll("a", {"class":"link companyLink"}))>0):
+                pCompany = post.find("a", {"class":"link companyLink"}).text.strip()
+
+            if (len(post.findAll("p", {"class":"inline xs"}))>0):
+                pLocation = post.find("p", {"class":"inline xs"}).text.strip()
+                pLocation = pLocation.replace(' - '," ")
+
+            if (len(post.findAll("time", {"class":"xs"}))>0):
+                daysStr = post.find("time", {"class":"xs"}).text.strip()
+                daysStr = daysStr.split(" ")
+                if "today" in daysStr:
+                    days = 0
+                elif "day(s)" in daysStr:
+                    daysStr = daysStr[0]
+                    if ((daysStr.replace(" ","")).isdigit()):
+                        days = int(daysStr)
+                    else:
+                        days = 0
+                        print('has days but no #',daysStr)
+                else:
+                    days = 0
+                    print('no today, no days, no #',daysStr)
+            else:
+                days = 0
+            
+            website = post.find("h2", {"class":"h3 pr4"})
+            if website:
+                link = website.find("a", href=True)
+                if link:
+                    pUrl = "https://www.jobillico.com"+link['href']
+                    
+            current_data = [pTitle.replace('"',"'").replace('=',''),"",pCompany.replace('"',"'"),taeLocation(pLocation)]
+            taeDataCase(pUrl, current_data, current_data+[(datetime.datetime.now()-datetime.timedelta(days)).strftime("%a %d %b %Y"),"Jobillico",pUrl], data_Jobillico)
+
+
+options = uc.ChromeOptions()
+options.headless = True
+driver = webdriver.Chrome(options=options, service=ChromeService(ChromeDriverManager().install())) 
+driver.maximize_window()
+
+page_url_linkedin1 = "https://ca.linkedin.com/jobs/linkedin-jobs?position=1&pageNum=0"
+page_url_linkedin2 = "https://www.linkedin.com/jobs/search?keywords=&location=Montreal%2C%20Quebec%2C%20Canada&locationId=&geoId=101330853&sortBy=DD&f_TPR=&position=1&pageNum=0"
+
+driver.get(page_url_linkedin1)
+time.sleep(3)
+driver.get(page_url_linkedin2)
+time.sleep(3)
+
+h1 = driver.execute_script("return document.body.scrollHeight")
+i = 0
+while i<cap_Linkedin:
+    print('Currently scrolling page',str(i),'of Linkedin')
+    driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+    time.sleep(2)
+    h2 = driver.execute_script("return document.body.scrollHeight")
+    if h1==h2:
+        if driver.find_elements('css selector', 'button.infinite-scroller__show-more-button.infinite-scroller__show-more-button--visible'):
+            button = driver.find_element('css selector', 'button.infinite-scroller__show-more-button.infinite-scroller__show-more-button--visible')
+            ActionChains(driver).move_to_element(button).click(button).perform()
+            time.sleep(3)
+            h2 = driver.execute_script("return document.body.scrollHeight")
+        else:
+            driver.execute_script("window.scrollTo(0, 1000);")
+            time.sleep(2)
+            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            time.sleep(2)
+            print('ya aint shit')
+            h2 = driver.execute_script("return document.body.scrollHeight")
+    h1=h2
+    i = i+1
+
+posts = driver.find_elements('css selector', 'div.base-card.base-card--link.base-search-card.base-search-card--link.job-search-card')
+time.sleep(5)
+
+for post in posts:
+    if post.find_elements('css selector', "time[class^='job-search-card__listdate']"):
+        pTitle = post.find_element('css selector', 'h3.base-search-card__title').get_attribute("innerText").strip()
+        pSalary = ""
+        if post.find_elements('css selector', 'span.job-search-card__salary-info'):
+            pSalary = " ".join((post.find_element('css selector', 'span.job-search-card__salary-info').get_attribute("innerText").strip().replace('"',"'")).split())
+        pTime = post.find_element('css selector', "time[class^='job-search-card__listdate']").get_attribute('datetime')
+        pCompany = post.find_element('css selector', 'h4.base-search-card__subtitle').get_attribute("innerText").strip()
+        pLocation = taeLocation(post.find_element('css selector', 'span.job-search-card__location').get_attribute("innerText").strip().replace("Quebec, Canada","QC"))
+        pUrl = post.find_element('css selector', 'a.base-card__full-link').get_attribute('href')
+
+        current_data = [pTitle.replace('"',"'").replace('=',''),pSalary,pCompany.replace('"',"'"),taeLocation(pLocation)]
+        taeDataCase(pUrl, current_data, current_data+[datetime.datetime.strptime(pTime,"%Y-%m-%d").strftime("%a %d %b %Y"),"Linkedin",pUrl], data_Linkedin)
+driver.close()
+driver.quit()
+
+
+options = uc.ChromeOptions()
+options.headless = False
+driver = uc.Chrome(use_subprocess=True, options=options)
+
+page_url_Monster = "https://www.monster.ca"
+driver.get(page_url_Monster)
+time.sleep(3)
+
+page_url_Monster = "https://www.monster.ca/jobs/l-montreal-qc"
+driver.set_window_size(600, 1000)
+driver.get(page_url_Monster)
+time.sleep(3)
+
+h1 = driver.execute_script("return document.body.scrollHeight")
+i = 0
+while i<cap_Monster:
+    print('Currently scrolling page',str(i),'of Monster')
+    driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+    time.sleep(2)
+    h2 = driver.execute_script("return document.body.scrollHeight")
+    if h1==h2:
+        if driver.find_elements('css selector', 'button[class="sc-dkPtyc hVjBwZ  ds-button"'):
+            button = driver.find_element('css selector', 'button[class="sc-dkPtyc hVjBwZ  ds-button"')
+            ActionChains(driver).move_to_element(button).click(button).perform()
+            time.sleep(3)
+            h2 = driver.execute_script("return document.body.scrollHeight")
+        else:
+            driver.execute_script("window.scrollTo(0, 1000);")
+            time.sleep(2)
+            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            time.sleep(2)
+            print('ya aint shit')
+            h2 = driver.execute_script("return document.body.scrollHeight")
+    h1=h2
+    i = i+1
+
+posts = driver.find_elements('css selector', 'article[data-test-id^="svx-job-card-component-"]')
+time.sleep(5)
+
+for post in posts:
+    
+    if post.find_elements('css selector', 'a[data-testid="jobTitle"]'):
+        pSalary = ''
+        pCompany = ''
+        pLocation = ''
+        pUrl = ''
+        pTitle = post.find_element('css selector', 'a[data-testid="jobTitle"]').get_attribute("innerText").strip()
+
+        if post.find_elements('css selector', 'div[data-tagtype-testid="payTag"]'):
+            pSalary = post.find_element('css selector', 'div[data-tagtype-testid="payTag"]').get_attribute("innerText").strip().replace(" /"," ").replace('"',"'").replace('Per Year','a year').replace('Per Hour','an hour').replace('Per Week','a week').replace('Per Month','a month')
+            pSalary = pSalary.split(' ')
+            j = 0
+            while j < len(pSalary):
+                if (('k' in pSalary[j]) and ('week' not in pSalary[j])):
+                    pSalary[j] = (pSalary[j]).replace('k','').replace('$','')
+                    pSalary[j] = '$'+"{:,}".format(int(float(pSalary[j])*1000))
+                j = j + 1
+            pSalary = ' '.join(pSalary)
+
+        if post.find_elements('css selector', 'span[data-testid="jobDetailDateRecency"]'):
+            pTime = post.find_element('css selector', 'span[data-testid="jobDetailDateRecency"]').get_attribute("innerText").strip()
+
+        if pTime=="Today":
+            days = 0
+        else:
+            if ((pTime[0:2].replace(" ","")).isdigit()):
+                days = int(pTime[0:2])
+            else:
+                days = 0
+                print(pTime)
+
+        if post.find_elements('css selector', 'span[data-testid="company"]'):
+            pCompany = post.find_element('css selector', 'span[data-testid="company"]').get_attribute("innerText").strip()
+
+        if post.find_elements('css selector', 'span[data-testid="jobDetailLocation"]'):
+            pLocation = taeLocation(post.find_element('css selector', 'span[data-testid="jobDetailLocation"]').get_attribute("innerText").strip())
+            if len(pLocation.split(' '))==1 and not pLocation.split(" ") == [""]:
+                pLocation = pLocation+' QC'
+
+        pUrl = post.find_element('css selector', 'a[data-testid="jobTitle"]').get_attribute('href')
+
+        current_data = [pTitle.replace('"',"'").replace('=',''),pSalary,pCompany.replace('"',"'"),taeLocation(pLocation)]
+        taeDataCase(pUrl, current_data, current_data+[(datetime.datetime.now()-datetime.timedelta(days)).strftime("%a %d %b %Y"),"Monster",pUrl], data_Monster)
+driver.close()
+driver.quit()
+
+
+pSalary = ''
+i=0
+page_url = "https://www.jobboom.com/en"
+session = requests.Session()
+webpage = session.get(page_url, headers={'User-Agent': 'Mozilla/5.0'}, verify=True).content
+time.sleep(2)
+while (i<cap_Jobboom):
+
+    i=i+1
+    page_url = "https://www.jobboom.com/en/montreal-region/_r1-"+str(i)+"?sortBy=date"
+    
+    posts = []
+    attempt = 0
+    while (attempt < max_attempts and len(posts)==0):
+        webpage = session.get(page_url, headers={'User-Agent': 'Mozilla/5.0'}, verify=True).content
         time.sleep(2)
         page_soup = soup(webpage.decode('utf-8-sig'),"html.parser")
         page_soup.prettify()
-        posts = page_soup.findAll("div", {"class": "-job"})
+
+        posts = page_soup.find_all("div", {"class":["job_item","job_item_video"]})
+
         attempt += 1
         print("\n"+str(len(posts))+" jobs processed for page "+str(i)+", attempt #"+str(attempt))
 
     for post in posts:
-        pTitle = ""
-        pSalary = ""
-        pCompany = ""
-        pLocation = ""
-        pUrl = ""
-        days = ""
+        pCompany = ''
+        pLocation = ''
 
-        if (len(post.findAll("h3", {"class":"mb4"}))>0):
-            pCompany = post.find("h3", {"class":"mb4"}).text.strip()
-            pCompany = pCompany.split("•")[0]
-            pCompany = pCompany.split(" ")
-            pCompany = [s.replace("\r\n","") for s in pCompany]
-            pCompany[:] = [x for x in pCompany if x]
-            pCompany = " ".join(pCompany)
+        link_title = post.find("p", {"class":"offre"}).find("a", href=True)
+        pTitle = link_title['title']
+        
+        if (len(post.findAll("p", {"class":'employeur'}))>0):
+            pCompany = post.find("p", {"class":'employeur'}).find("span").text.strip()
 
-            if (len(post.findAll("h2", {"class":"mb4"}))>0):
-                pTitle = post.find("h2", {"class":"mb4"}).text.strip()
+        if (len(post.findAll("span", {"class":"jobCityProv"}))>0):
+            pLocation = post.find("span", {"class":"jobCityProv"}).text.strip()
+        elif (len(post.findAll("span", {"class":"bold"}))>0):
+            pLocation = post.find("span", {"class":"bold"}).text.strip().replace(',',' ')
+        pLocation = pLocation.replace('(Region de)','').replace('(Région de)','').replace('(Region)','QC').replace('(Région)','QC').replace('Quebec Montreal QC','Montreal QC')
+        pLocation = pLocation.replace('Montreal / Saint Laurent','Saint Laurent')
 
-            if (len(post.findAll('li', title=True))>0):
-                pSalary = post.find('li', title=True).text.strip()
-                if 'k' in pSalary and '.' not in pSalary:
-                    pSalary = pSalary.replace('k',',000').replace('–',' - ')
-                else:
-                    pSalary = pSalary.replace('–',' - ')
+        if '(' in pLocation:
+            pLocation = pLocation.split('(')[0]
 
-            if (len(post.findAll("span", {"class":"fc-black-500"}))>0):
-                pLocation = post.find("span", {"class":"fc-black-500"}).text.strip()
-                pLocation = pLocation.split(" ")
-                if "Canada" in pLocation: pLocation.remove("Canada")
-                pLocation = " ".join(pLocation)
+        pUrl = "https://www.jobboom.com"+link_title['href']
 
-            daysStr = post.find("ul", {"class":"mt4"}).text.strip()
-            if "h ago" in daysStr:
-                days_ago = 0
-            elif "d ago" in daysStr:
-                days_ago = ''.join(i for i in (daysStr.split("d ago")[0]) if i.isdigit())
-            elif "yesterday" in daysStr:
-                days_ago = 1
-            else:
-                print(str(days_ago))
-                days_ago = 0
-            
-            days = (datetime.datetime.now()-datetime.timedelta(int(days_ago))).strftime("%a %d %b %Y")
-            pUrl = "https://stackoverflow.com"+post.find("a", {"class":"stretched-link"})["href"]
+        current_data = [pTitle.replace('"',"'").replace('=',''),"",pCompany.replace('"',"'"),taeLocation(pLocation)]
+        taeDataCase(pUrl, current_data, current_data+[(datetime.datetime.now()).strftime("%a %d %b %Y"),"Jobboom",pUrl], data_Jobboom)
+session.close()
 
-            current_data = [pTitle.replace('"',"'").replace('=',''),pSalary.replace('"',"'"),pCompany.replace('"',"'"),taeLocation(pLocation)]
-            rest_current_data = [(datetime.datetime.now()-datetime.timedelta(int(days_ago))).strftime("%a %d %b %Y"),"Stackoverflow",pUrl]
-            current_full_data = current_data+rest_current_data
-            taeDataCase(pUrl, current_data, current_full_data, data_Stackoverflow)
-'''
 '''
 i=0
 page_url = "https://www.eluta.ca/"
@@ -643,9 +798,6 @@ while (i<cap_Workopolis):
             page_soup = soup(webpage.decode('utf-8-sig'),"html.parser")
             page_soup.prettify()
             posts = page_soup.find_all("article", {"class":"SerpJob"})
-        except TimeoutException:
-            attempt += 1
-            print("\n page "+str(i)+", attempt #"+str(attempt)+" is unsucessful")
         finally:
             attempt += 1
             print("\n"+str(len(posts))+" jobs processed for page "+str(i)+", attempt #"+str(attempt))
@@ -682,354 +834,12 @@ while (i<cap_Workopolis):
 
         current_data = [pTitle.replace('"',"'").replace('=',''),pSalary,pCompany.replace('"',"'"),taeLocation(pLocation)]
         taeDataCase(pUrl, current_data, current_data+[datetime.datetime.strptime(daysStr,"%Y-%m-%d").strftime("%a %d %b %Y"),"Workopolis",pUrl], data_Workopolis)
-'''
-
-pSalary = ''
-i=0
-while (i<cap_Jobillico):
-    i=i+1
-    page_url = "https://www.jobillico.com/search-jobs?skwd=&scty=Montreal%2C%20QC&icty=6185&mfil=15&sort=date&ipg="+str(i)
-    posts = []
-    attempt = 0
-    while (attempt < max_attempts and len(posts)==0):
-        req = Request(page_url, headers={'User-Agent': 'Mozilla/5.0'})
-        try:
-            webpage = urlopen(req, timeout = 15).read()
-            time.sleep(2)
-            page_soup = soup(webpage.decode('utf-8-sig'),"html.parser")
-            page_soup.prettify()
-            posts = page_soup.find_all("article", ref=lambda x: x and x.startswith("job"))
-        except TimeoutException:
-            attempt += 1
-            print("\n page "+str(i)+", attempt #"+str(attempt)+" is unsucessful")
-        finally:
-            attempt += 1
-            print("\n"+str(len(posts))+" jobs processed for page "+str(i)+", attempt #"+str(attempt))
-
-    for post in posts:
-        pTitle = ''
-        pCompany = ''
-        pLocation = ''
-
-        if (len(post.findAll("h2", {"class":"h3 pr4"}))>0):
-            pTitle = post.find("h2", {"class":"h3 pr4"}).text.strip()
-
-            if (len(post.findAll("a", {"class":"link companyLink"}))>0):
-                pCompany = post.find("a", {"class":"link companyLink"}).text.strip()
-
-            if (len(post.findAll("p", {"class":"inline xs"}))>0):
-                pLocation = post.find("p", {"class":"inline xs"}).text.strip()
-                pLocation = pLocation.replace(' - '," ")
-
-            if (len(post.findAll("time", {"class":"xs"}))>0):
-                daysStr = post.find("time", {"class":"xs"}).text.strip()
-                daysStr = daysStr.split(" ")
-                if "today" in daysStr:
-                    days = 0
-                elif "day(s)" in daysStr:
-                    daysStr = daysStr[0]
-                    if ((daysStr.replace(" ","")).isdigit()):
-                        days = int(daysStr)
-                    else:
-                        days = 0
-                        print('has days but no #',daysStr)
-                else:
-                    days = 0
-                    print('no today, no days, no #',daysStr)
-            else:
-                days = 0
-            
-            website = post.find("h2", {"class":"h3 pr4"})
-            if website:
-                link = website.find("a", href=True)
-                if link:
-                    pUrl = "https://www.jobillico.com"+link['href']
-                    
-            current_data = [pTitle.replace('"',"'").replace('=',''),"",pCompany.replace('"',"'"),taeLocation(pLocation)]
-            taeDataCase(pUrl, current_data, current_data+[(datetime.datetime.now()-datetime.timedelta(days)).strftime("%a %d %b %Y"),"Jobillico",pUrl], data_Jobillico)
-
-
-#infinite scrolling website, we need to use selenium to scroll these pages and then pull the data
-options = webdriver.ChromeOptions()
-options.add_experimental_option('excludeSwitches', ['enable-logging'])
-#by disabling this, you can see the chrome window bring controlled
-options.headless = True
-ser = Service("E:\\chromedriver_win32\\chromedriver.exe")
-driver = webdriver.Chrome(service=ser, options = options)
-driver.maximize_window()
-
-page_url_linkedin1 = "https://ca.linkedin.com/jobs/linkedin-jobs?position=1&pageNum=0"
-page_url_linkedin2 = "https://www.linkedin.com/jobs/search?keywords=&location=Montreal%2C%20Quebec%2C%20Canada&locationId=&geoId=101330853&sortBy=DD&f_TPR=&position=1&pageNum=0"
-
-driver.get(page_url_linkedin1)
-time.sleep(3)
-driver.get(page_url_linkedin2)
-time.sleep(3)
-
-h1 = driver.execute_script("return document.body.scrollHeight")
-i = 0
-while i<cap_Linkedin:
-    print('Currently scrolling page',str(i),'of Linkedin')
-    driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-    time.sleep(2)
-    h2 = driver.execute_script("return document.body.scrollHeight")
-    if h1==h2:
-        if driver.find_elements('css selector', 'button.infinite-scroller__show-more-button.infinite-scroller__show-more-button--visible'):
-            button = driver.find_element('css selector', 'button.infinite-scroller__show-more-button.infinite-scroller__show-more-button--visible')
-            ActionChains(driver).move_to_element(button).click(button).perform()
-            time.sleep(3)
-            h2 = driver.execute_script("return document.body.scrollHeight")
-        else:
-            driver.execute_script("window.scrollTo(0, 1000);")
-            time.sleep(2)
-            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            time.sleep(2)
-            print('ya aint shit')
-            h2 = driver.execute_script("return document.body.scrollHeight")
-    h1=h2
-    i = i+1
-
-posts = driver.find_elements('css selector', 'div.base-card.base-card--link.base-search-card.base-search-card--link.job-search-card')
-time.sleep(5)
-
-for post in posts:
-    if post.find_elements('css selector', "time[class^='job-search-card__listdate']"):
-        pTitle = post.find_element('css selector', 'h3.base-search-card__title').get_attribute("innerText").strip()
-        pSalary = ""
-        if post.find_elements('css selector', 'span.job-search-card__salary-info'):
-            pSalary = " ".join((post.find_element('css selector', 'span.job-search-card__salary-info').get_attribute("innerText").strip().replace('"',"'")).split())
-        pTime = post.find_element('css selector', "time[class^='job-search-card__listdate']").get_attribute('datetime')
-        pCompany = post.find_element('css selector', 'h4.base-search-card__subtitle').get_attribute("innerText").strip()
-        pLocation = taeLocation(post.find_element('css selector', 'span.job-search-card__location').get_attribute("innerText").strip().replace("Quebec, Canada","QC"))
-        pUrl = post.find_element('css selector', 'a.base-card__full-link').get_attribute('href')
-
-        current_data = [pTitle.replace('"',"'").replace('=',''),pSalary,pCompany.replace('"',"'"),taeLocation(pLocation)]
-        taeDataCase(pUrl, current_data, current_data+[datetime.datetime.strptime(pTime,"%Y-%m-%d").strftime("%a %d %b %Y"),"Linkedin",pUrl], data_Linkedin)
-driver.close()
-driver.quit()
 
 
 
+options = uc.ChromeOptions()
 options.headless = False
-
-ser = Service("E:\\chromedriver_win32\\chromedriver.exe")
-driver = webdriver.Chrome(service=ser, options = options)
-
-page_url_Monster = "https://www.monster.ca"
-driver.get(page_url_Monster)
-time.sleep(3)
-
-page_url_Monster = "https://www.monster.ca/jobs/l-montreal-qc"
-driver.set_window_size(600, 1000)
-driver.get(page_url_Monster)
-time.sleep(3)
-
-h1 = driver.execute_script("return document.body.scrollHeight")
-i = 0
-while i<cap_Monster:
-    print('Currently scrolling page',str(i),'of Monster')
-    driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-    time.sleep(2)
-    h2 = driver.execute_script("return document.body.scrollHeight")
-    if h1==h2:
-        if driver.find_elements('css selector', 'button[class="sc-dkPtyc hVjBwZ  ds-button"'):
-            button = driver.find_element('css selector', 'button[class="sc-dkPtyc hVjBwZ  ds-button"')
-            ActionChains(driver).move_to_element(button).click(button).perform()
-            time.sleep(3)
-            h2 = driver.execute_script("return document.body.scrollHeight")
-        else:
-            driver.execute_script("window.scrollTo(0, 1000);")
-            time.sleep(2)
-            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            time.sleep(2)
-            print('ya aint shit')
-            h2 = driver.execute_script("return document.body.scrollHeight")
-    h1=h2
-    i = i+1
-
-posts = driver.find_elements('css selector', 'a[data-test-id^="svx-job-card-component-"]')
-time.sleep(5)
-
-for post in posts:
-    
-    if post.find_elements('css selector', 'div[data-test-id="svx-job-title"]'):
-        pSalary = ''
-        pCompany = ''
-        pLocation = ''
-        pUrl = ''
-        pTitle = post.find_element('css selector', 'div[data-test-id="svx-job-title"]').get_attribute("innerText").strip()
-
-        if post.find_elements('css selector', 'p[data-test-id="svx-job-salary-range"]'):
-            pSalary = post.find_element('css selector', 'p[data-test-id="svx-job-salary-range"]').get_attribute("innerText").strip().replace(" /"," ").replace('"',"'").replace('Per Year','a year').replace('Per Hour','an hour').replace('Per Week','a week').replace('Per Month','a month')
-            pSalary = pSalary.split(' ')
-            j = 0
-            while j < len(pSalary):
-                if (('k' in pSalary[j]) and ('week' not in pSalary[j])):
-                    pSalary[j] = (pSalary[j]).replace('k','').replace('$','')
-                    pSalary[j] = '$'+"{:,}".format(int(float(pSalary[j])*1000))
-                j = j + 1
-            pSalary = ' '.join(pSalary)
-
-        if post.find_elements('css selector', 'span[data-test-id="svx-job-date"]'):
-            pTime = post.find_element('css selector', 'span[data-test-id="svx-job-date"]').get_attribute("innerText").strip()
-
-        if pTime=="Today":
-            days = 0
-        else:
-            if ((pTime[0:2].replace(" ","")).isdigit()):
-                days = int(pTime[0:2])
-            else:
-                days = 0
-                print(pTime)
-
-        if post.find_elements('css selector', 'h3[data-test-id="svx-job-company"]'):
-            pCompany = post.find_element('css selector', 'h3[data-test-id="svx-job-company"]').get_attribute("innerText").strip()
-
-        if post.find_elements('css selector', 'p[data-test-id="svx-job-location"]'):
-            pLocation = taeLocation(post.find_element('css selector', 'p[data-test-id="svx-job-location"]').get_attribute("innerText").strip())
-            if len(pLocation.split(' '))==1 and not pLocation.split(" ") == [""]:
-                pLocation = pLocation+' QC'
-
-        pUrl = post.get_attribute('href')
-
-        current_data = [pTitle.replace('"',"'").replace('=',''),pSalary,pCompany.replace('"',"'"),taeLocation(pLocation)]
-        taeDataCase(pUrl, current_data, current_data+[(datetime.datetime.now()-datetime.timedelta(days)).strftime("%a %d %b %Y"),"Monster",pUrl], data_Monster)
-driver.close()
-driver.quit()
-
-
-pSalary = ''
-i=0
-page_url = "https://www.jobboom.com/en"
-session = requests.Session()
-webpage = session.get(page_url, headers={'User-Agent': 'Mozilla/5.0'}, verify=True).content
-time.sleep(2)
-while (i<cap_Jobboom):
-
-    i=i+1
-    page_url = "https://www.jobboom.com/en/montreal-region/_r1-"+str(i)+"?sortBy=date"
-    
-    posts = []
-    attempt = 0
-    while (attempt < max_attempts and len(posts)==0):
-        webpage = session.get(page_url, headers={'User-Agent': 'Mozilla/5.0'}, verify=True).content
-        time.sleep(2)
-        page_soup = soup(webpage.decode('utf-8-sig'),"html.parser")
-        page_soup.prettify()
-
-        posts = page_soup.find_all("div", {"class":["job_item","job_item_video"]})
-
-        attempt += 1
-        print("\n"+str(len(posts))+" jobs processed for page "+str(i)+", attempt #"+str(attempt))
-
-    for post in posts:
-        pCompany = ''
-        pLocation = ''
-
-        link_title = post.find("p", {"class":"offre"}).find("a", href=True)
-        pTitle = link_title['title']
-        
-        if (len(post.findAll("p", {"class":'employeur'}))>0):
-            pCompany = post.find("p", {"class":'employeur'}).find("span").text.strip()
-
-        if (len(post.findAll("span", {"class":"jobCityProv"}))>0):
-            pLocation = post.find("span", {"class":"jobCityProv"}).text.strip()
-        elif (len(post.findAll("span", {"class":"bold"}))>0):
-            pLocation = post.find("span", {"class":"bold"}).text.strip().replace(',',' ')
-        pLocation = pLocation.replace('(Region de)','').replace('(Région de)','').replace('(Region)','QC').replace('(Région)','QC').replace('Quebec Montreal QC','Montreal QC')
-        pLocation = pLocation.replace('Montreal / Saint Laurent','Saint Laurent')
-
-        if '(' in pLocation:
-            pLocation = pLocation.split('(')[0]
-
-        pUrl = "https://www.jobboom.com"+link_title['href']
-
-        current_data = [pTitle.replace('"',"'").replace('=',''),"",pCompany.replace('"',"'"),taeLocation(pLocation)]
-        taeDataCase(pUrl, current_data, current_data+[(datetime.datetime.now()).strftime("%a %d %b %Y"),"Jobboom",pUrl], data_Jobboom)
-session.close()
-
-'''
-options.headless = True
-ser = Service("E:\\chromedriver_win32\\chromedriver.exe")
-driver = webdriver.Chrome(service=ser, options = options)
-
-page_url_Facebook = "https://www.facebook.com/jobs/"
-driver.get(page_url_Facebook)
-time.sleep(3)
-
-page_url_Facebook = "https://www.facebook.com/jobs/montreal"
-driver.maximize_window()
-driver.get(page_url_Facebook)
-time.sleep(3)
-
-page_url_Facebook = "https://www.facebook.com/jobs/Montreal,%20Quebec-montreal/?radius=40000&tab=find_jobs"
-driver.get(page_url_Facebook)
-time.sleep(3)
-
-i = 0
-while i<cap_Facebook:
-    print('Currently scrolling page',str(i),'of Facebook')
-    driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-    time.sleep(2)
-    i = i+1
-
-posts = driver.find_elements('css selector', 'div.scb9dxdr.sj5x9vvc.dflh9lhu.cxgpxx05.w0hvl6rk.qjjbsfad')
-time.sleep(5)
-
-for post in posts:
-    pSalary = ''
-    pLocation = ''
-    pCompany = ''
-
-    link_title = post.find_element('css selector', 'a.oajrlxb2.g5ia77u1.qu0x051f.esr5mh6w.e9989ue4.r7d6kgcz.rq0escxv.nhd2j8a9.nc684nl6.p7hjln8o.kvgmc6g5.cxmmr5t8.oygrvhab.hcukyx3x.jb3vyjys.rz4wbd8a.qt6c0cv9.a8nywdso.i1ao9s8h.esuyzwwr.f1sip0of.lzcic4wl.gmql0nx0.gpro0wi8')
-    pTitle = link_title.get_attribute("innerText").strip()
-
-    if post.find_elements('css selector', 'span.d2edcug0.hpfvmrgz.qv66sw1b.c1et5uql.lr9zc1uh.a8c37x1j.keod5gw0.nxhoafnm.aigsh9s9.d3f4x2em.fe6kdd0r.mau55g9w.c8b282yb.iv3no6db.a5q79mjw.g1cxx5fr.b1v8xokw.g5o1ygfq'):
-        pSalary = post.find_element('css selector', 'span.d2edcug0.hpfvmrgz.qv66sw1b.c1et5uql.lr9zc1uh.a8c37x1j.keod5gw0.nxhoafnm.aigsh9s9.d3f4x2em.fe6kdd0r.mau55g9w.c8b282yb.iv3no6db.a5q79mjw.g1cxx5fr.b1v8xokw.g5o1ygfq').get_attribute("innerText").strip().replace('CA','').replace('/ hour','an hour').replace('/ week','a week').replace('/ month','a month').replace('/ day','a day').replace('/ year','a year')
-
-    if post.find_elements('css selector', 'span.d2edcug0.hpfvmrgz.qv66sw1b.c1et5uql.lr9zc1uh.a8c37x1j.keod5gw0.nxhoafnm.aigsh9s9.d3f4x2em.fe6kdd0r.mau55g9w.c8b282yb.iv3no6db.jq4qci2q.a3bd9o3v.b1v8xokw.m9osqain'):
-        time_company_location = post.find_element('css selector', 'span.d2edcug0.hpfvmrgz.qv66sw1b.c1et5uql.lr9zc1uh.a8c37x1j.keod5gw0.nxhoafnm.aigsh9s9.d3f4x2em.fe6kdd0r.mau55g9w.c8b282yb.iv3no6db.jq4qci2q.a3bd9o3v.b1v8xokw.m9osqain')[0].get_attribute("innerText").strip()
-        time_company_location = time_company_location.split('·')
-
-        if len(time_company_location) >= 2:
-            pCompany = time_company_location[1].replace("\n","")
-            pCompany = pCompany.split(" ")
-            pCompany[:] = [x for x in pCompany if x]
-            pCompany = " ".join(pCompany)
-
-        if len(time_company_location) >= 3:
-            pLocation = taeLocation(time_company_location[2]+' QC')
-            pLocation = pLocation.replace("\n","").replace('Montreal Quebec','Montreal').replace('Quebec Montreal','Montreal')
-            pLocation = pLocation.split(" ")
-            pLocation[:] = [x for x in pLocation if x]
-            pLocation = " ".join(pLocation)
-
-        pTime = time_company_location[0].replace("\n","").split(" ")
-        pTime[:] = [x for x in pTime if x]
-        pTime = " ".join(pTime)
-        if pTime=="New":
-            days = 0
-        else:
-            if ((pTime.replace("d","")).isdigit()):
-                days = int(pTime.replace("d",""))
-            else:
-                days = 0
-                print(pTime)
-        
-        pUrl = link_title.get_attribute('href')
-
-        current_data = [pTitle.replace('"',"'").replace('=',''),pSalary.replace('"',"'"),pCompany.replace('"',"'"),taeLocation(pLocation)]
-        rest_current_data = [(datetime.datetime.now()-datetime.timedelta(days)).strftime("%a %d %b %Y"),"Facebook",pUrl]
-        current_full_data = current_data+rest_current_data
-        taeDataCase(pUrl, current_data, current_full_data, data_Facebook)
-driver.close()
-driver.quit()
-'''
-
-
-options.headless = False
-ser = Service("E:\\chromedriver_win32\\chromedriver.exe")
-driver = webdriver.Chrome(service=ser, options = options)
+driver = uc.Chrome(use_subprocess=True, options=options)
 
 page_url = "https://www.google.ca/"
 driver.maximize_window()
@@ -1131,6 +941,7 @@ if driver.find_elements('css selector', "input.gLFyf.gsfi"):
             taeDataCase(pUrl, current_data, current_data+[(datetime.datetime.now()-datetime.timedelta(days)).strftime("%a %d %b %Y"),"Google jobs",pUrl], data_Google_jobs)
 driver.close()
 driver.quit()
+'''
 
 
 # opens and writes file
