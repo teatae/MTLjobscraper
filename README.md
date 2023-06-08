@@ -1,11 +1,8 @@
 >In case the chrome driver is outdated:
-
 Check chrome version top right of browser -> help -> google chrome driver:
 ==========================================================================
-
-##### 92.0.4515.107 (Official Build) (32-bit)
-
-##[Click for Chromedriver website](https://sites.google.com/chromium.org/driver/downloads)
+## 92.0.4515.107 (Official Build) (32-bit)
+[Click for Chromedriver website](https://sites.google.com/chromium.org/driver/downloads)
 
 Welcome to Tae's beautiful scraper
 ==================================
