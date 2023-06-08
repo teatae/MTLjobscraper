@@ -27,7 +27,8 @@ from selenium.webdriver.chrome.service import Service
 sys.stdout.reconfigure(encoding='utf-8-sig')
 ssl._create_default_https_context = ssl._create_unverified_context
 start_time = datetime.datetime.now()
-max_date = start_time-datetime.timedelta(42) #max_date is 42 days (6 weeks) from current date
+max_date = start_time-datetime.timedelta(21) #max_date is 42 days (6 weeks) from current date
+#max_date = start_time-datetime.timedelta(42) #max_date is 42 days (6 weeks) from current date
 
 print("Welcome to Tae's beautiful scraper")
 
@@ -307,6 +308,7 @@ cap_Jobillico = 30 #30
 cap_Linkedin = 50 #50
 cap_Monster = 15 #15
 cap_Jobboom = 60 #60
+
 
 max_attempts = 2
 
