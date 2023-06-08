@@ -1,7 +1,3 @@
->In case the chrome driver is outdated: Check chrome version top right of browser -> help -> google chrome driver:
-## 92.0.4515.107 (Official Build) (32-bit)
-[Click for Chromedriver website](https://sites.google.com/chromium.org/driver/downloads)
-
 Welcome to Tae's beautiful scraper
 ==================================
 
@@ -30,3 +26,7 @@ Processes each line of report-mtl.csv
 pip install --upgrade pip  
 pip install selenium  
 py -m pip install selenium webdriver-manager  
+
+## In case the chrome driver is outdated
+Check chrome version top right of browser -> help -> google chrome driver:
+[Click for Chromedriver website](https://sites.google.com/chromium.org/driver/downloads)
