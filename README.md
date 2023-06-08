@@ -5,6 +5,9 @@ Welcome to Tae's beautiful scraper
 ![preview](https://github.com/teatae/MTLjobscraper/blob/main/preview.png?raw=true)  
 Filename is report-mtl.csv  
 
+## Console output  
+![preview](https://github.com/teatae/MTLjobscraper/blob/main/preview2.png?raw=true)  
+
 There are 4 cases of incoming data  
 Data format is [Title, Salary, Company, Location, Date, Website, URL]  
 we will refer to [Title, Salary, Company, Location] as mainData  
