@@ -9,7 +9,7 @@ Check chrome version top right of browser -> help -> google chrome driver:
 ===================================================================
 
 ## Example of excel file output  
-![preview](https://github.com/teatae/teatae.github.io/blob/main/preview.png?raw=true)  
+![preview](https://github.com/teatae/MTLjobscraper/blob/main/preview.png?raw=true)  
 
 ##### Get Win32 zip
 
