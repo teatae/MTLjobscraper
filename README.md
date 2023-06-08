@@ -8,18 +8,12 @@ Check chrome version top right of browser -> help -> google chrome driver:
 [Click for Download Link](https://sites.google.com/chromium.org/driver/downloads)
 ===================================================================
 
-## Example of excel file output  
-![preview](https://github.com/teatae/MTLjobscraper/blob/main/preview.png?raw=true)  
-
-##### Get Win32 zip
-
-pip install --upgrade pip  
-pip install selenium  
-py -m pip install selenium webdriver-manager  
-
 Welcome to Tae's beautiful scraper
 ==================================
-Current filename is report-mtl.csv  
+
+## Example of excel file output  
+![preview](https://github.com/teatae/MTLjobscraper/blob/main/preview.png?raw=true)  
+Filename is report-mtl.csv  
 
 There are 4 cases of incoming data  
 Data format is [Title, Salary, Company, Location, Date, Website, URL]  
@@ -36,3 +30,9 @@ if Backup file is bigger than file, Backup file 'report-mtl - Copy.csv' is not o
 
 Column names are Title,Salary,Company,Location,Date,Website,URL  
 Processes each line of report-mtl.csv  
+
+##### Get Win32 zip
+
+pip install --upgrade pip  
+pip install selenium  
+py -m pip install selenium webdriver-manager  
