@@ -8,6 +8,9 @@ Check chrome version top right of browser -> help -> google chrome driver:
 [Click for Download Link](https://sites.google.com/chromium.org/driver/downloads)
 ===================================================================
 
+## Example of excel file output  
+![preview](https://github.com/teatae/teatae.github.io/blob/main/assets/preview.png?raw=true)  
+
 ##### Get Win32 zip
 
 pip install --upgrade pip  
