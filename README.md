@@ -1,5 +1,5 @@
-Welcome to Tae's beautiful scraper
-==================================
+Welcome to Tae's scraper
+========================
 
 ## Example of excel file output  
 ![preview](https://github.com/teatae/MTLjobscraper/blob/main/preview.png?raw=true)  
