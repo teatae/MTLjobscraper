@@ -27,7 +27,7 @@ from selenium.webdriver.chrome.service import Service
 sys.stdout.reconfigure(encoding='utf-8-sig')
 ssl._create_default_https_context = ssl._create_unverified_context
 start_time = datetime.datetime.now()
-max_date = start_time-datetime.timedelta(21) #max_date is 42 days (6 weeks) from current date
+max_date = start_time-datetime.timedelta(45) #max_date is 42 days (6 weeks) from current date
 #max_date = start_time-datetime.timedelta(42) #max_date is 42 days (6 weeks) from current date
 
 print("Welcome to Tae's beautiful scraper")
@@ -38,7 +38,7 @@ backup = filename[:len(filename)-4]+' - Copy.csv'
 print("Current filename is "+filename+"\n")
 
 # csv file header
-headers = "Title,Salary,Company,Location,Date,Website,URL\n"
+headers = "Title,Salary,Company,Location,On-site/Remote,Date,Website,URL\n"
 
 # Use this function to search for any files which matches the filename
 file_present = glob.glob(filename)
@@ -92,27 +92,27 @@ print("data_Website_writer is used to format data_Website into a csv string")
 def getSubData(i, j, data_Website):
     return [item[i:j] for item in data_Website]
 
-#adds [Title, Salary, Company, Location, Date, Website, URL] to data_Website
+#adds [Title, Salary, Company, Location, On-site/Remote, Date, Website, URL] to data_Website
 def taeAdd(data_Website, current_full_data):
     data_Website.append(current_full_data)
 
-#data in data_Website is [Title, Salary, Company, Location, Date, Website, URL]
+#data in data_Website is [Title, Salary, Company, Location, On-site/Remote, Date, Website, URL]
 #current_data is [Title, Salary, Company, Location]
 #removes data of data_Website with matching current_data
 def taePopData(data_Website, current_data):
-    index = getSubData(0, 4, data_Website).index(current_data)
+    index = getSubData(0, 5, data_Website).index(current_data)
     data_Website.pop(index)
 
-#data in data_Website is [Title, Salary, Company, Location, Date, Website, URL]
+#data in data_Website is [Title, Salary, Company, Location, On-site/Remote, Date, Website, URL]
 #pUrl is an URL
 #removes data of data_Website with matching pUrl
 def taePopUrls(data_Website, pUrl):
-    index = getSubData(6, 7, data_Website).index([pUrl])
+    index = getSubData(7, 8, data_Website).index([pUrl])
     data_Website.pop(index)
 
 #pUrl is the URL of the incoming data
 #current_date is [Title, Salary, Company, Location]
-#current_full_data is [Title, Salary, Company, Location, Date, Website, URL]
+#current_full_data is [Title, Salary, Company, Location, On-site/Remote, Date, Website, URL]
 def taeDataCase(pUrl, current_data, current_full_data, data_Website):
     # current_full_data[5] is website name
     # current_full_data[0] is title
@@ -122,21 +122,21 @@ def taeDataCase(pUrl, current_data, current_full_data, data_Website):
 
     if (current_full_data[0] == ""): # title not empty
         print("No title linked to the following data:", current_full_data)
-    elif [pUrl] not in getSubData(6, 7, data_Website):         #URL does not exist
-        if current_data not in getSubData(0, 4, data_Website): #Data does not exist
+    elif [pUrl] not in getSubData(7, 8, data_Website):         #URL does not exist
+        if current_data not in getSubData(0, 5, data_Website): #Data does not exist
             taeAdd(data_Website, current_full_data)
-            print("New data",current_full_data[5])
+            print("New data",current_full_data[6])
         else:                                                  #Data exist
             taePopData(data_Website, current_data)
             taeAdd(data_Website, current_full_data)
-            print("Updating URL",current_full_data[5])
+            print("Updating URL",current_full_data[6])
     else:                                                      #URL exist
-        if current_data not in getSubData(0, 4, data_Website): #Data does not exist
+        if current_data not in getSubData(0, 5, data_Website): #Data does not exist
             taePopUrls(data_Website, pUrl)
             taeAdd(data_Website, current_full_data)
-            print("Updating data",current_full_data[5])
+            print("Updating data",current_full_data[6])
         else:                                                  #Data exist
-            print("Duplicate",current_full_data[5])
+            print("Duplicate",current_full_data[6])
 
 #fixs most string errors
 def taeLocation(pLocation):
@@ -164,14 +164,17 @@ def taeLocation(pLocation):
         location = "Quebec"
     if location == "QC QC":
         location = "Quebec"
+    location.replace(' in ',' ');
+    if location.startswith("in "):
+        location = location[3:]
     return location
 
 #removes all data more than 42 days old (6 weeks)
 #sorts the data from newest to oldest date
 #formats data_Website into a csv string named data_Website_writer
 def taeWriteSorted(data_Website, data_Website_writer):
-    data_Website = [row for row in data_Website if datetime.datetime.strptime(row[4][0:],"%a %d %b %Y") >= max_date-datetime.timedelta(1)]
-    data_Website = sorted(data_Website, key = lambda row: datetime.datetime.strptime(row[4][0:],"%a %d %b %Y"), reverse=True)
+    data_Website = [row for row in data_Website if datetime.datetime.strptime(row[5][0:],"%a %d %b %Y") >= max_date-datetime.timedelta(1)]
+    data_Website = sorted(data_Website, key = lambda row: datetime.datetime.strptime(row[5][0:],"%a %d %b %Y"), reverse=True)
     for row in data_Website:
         data_Website_writer.append('"'+'","'.join(row)+'"')
 
@@ -187,6 +190,16 @@ def getFirstNumber(daysStr):
         days = nList[0]
     return days
 
+def findWorktype(text):
+    text = text.lower();
+    if "hybrid" in text and "remote" in text:
+        return "Hybrid Remote"
+    elif "remote" in text:
+        return "Remote"
+    elif "hybrid" in text:
+        return "Hybrid"
+    else:
+        return ""
 
 #if filename does not exist, create it
 if not file_present:
@@ -217,9 +230,9 @@ else:
                 print('Column names are '+(','.join(row)))
                 line_count += 1
             else:
-                website = ''.join(row[5:6])
+                website = ''.join(row[6:7])
                 if (len(row)>3):
-                    row[3] = taeLocation(row[3])
+                    row[3] = taeLocation(row[3]).replace('Remote ','').replace('remote ','').replace('Hybrid ','').replace('Hybride ','').replace('hybrid ','').replace('hybride ','')
                     if (website == "Indeed"):
                         data_Indeed.append(row)
                     elif (website == "Jobrapido"):
@@ -236,10 +249,10 @@ else:
                         data_Jobillico.append(row)
                     elif (website == "Google jobs"):
                         data_Google_jobs.append(row)
-                    elif (website == "Jobboom"):
-                        data_Jobboom.append(row)
-                    else:
-                        print(website)
+#                   elif (website == "Jobboom"):
+#                       data_Jobboom.append(row)
+#                    else:
+#                        print(website)
                 line_count += 1
         csv_file.close()
     print(str(line_count)+" lines are being processed")
@@ -264,8 +277,8 @@ else:
             print("First full_data in the table is ",str(data_Jobillico[0]).encode().decode())
         elif (len(data_Google_jobs) >0):
             print("First full_data in the table is ",str(data_Google_jobs[0]).encode().decode())
-        elif (len(data_Jobboom)>0):
-            print("First full_data in the table is ",str(data_Jobboom[0]).encode().decode())
+#       elif (len(data_Jobboom)>0):
+#           print("First full_data in the table is ",str(data_Jobboom[0]).encode().decode())'''
         else:
             print("what the hell")
 
@@ -300,7 +313,8 @@ cap_Linkedin = 50 #50
 cap_Monster = 15 #15
 cap_Jobboom = 30 #60
 cap_Google_jobs = 30 #30
-'''
+
+
 
 cap_Indeed = 25 #25
 cap_Jobrapido = 32 #32
@@ -308,6 +322,15 @@ cap_Jobillico = 30 #30
 cap_Linkedin = 50 #50
 cap_Monster = 15 #15
 cap_Jobboom = 60 #60
+
+
+'''
+cap_Indeed = 25 #25
+cap_Jobrapido = 32 #32
+cap_Jobillico = 30 #30
+cap_Linkedin = 50 #50
+cap_Monster = 15 #15
+#cap_Jobboom = 60 #60
 
 
 max_attempts = 2
@@ -390,7 +413,10 @@ while (i<cap_Indeed):
                         pUrl = post.find_element('css selector', "a[id^='job_']").get_attribute('href')
 
                 if pUrl != "":
-                    current_data = [pTitle.replace('"',"'").replace('=',''),pSalary,pCompany.replace('"',"'"),taeLocation(pLocation)]
+                    hybridremote = findWorktype(taeLocation(pLocation).replace('Remote ','').replace('remote ','').replace('Hybrid ','').replace('Hybride ','').replace('hybrid ','').replace('hybride ',''))
+                    if hybridremote == "":
+                        hybridremote = findWorktype(pTitle)
+                    current_data = [pTitle.replace('"',"'").replace('=',''),pSalary,pCompany.replace('"',"'"),taeLocation(pLocation).replace('Remote ','').replace('remote ','').replace('Hybrid ','').replace('Hybride ','').replace('hybrid ','').replace('hybride ',''),hybridremote]
                     taeDataCase(pUrl, current_data, current_data+[(datetime.datetime.now()-datetime.timedelta(days)).strftime("%a %d %b %Y"),'Indeed',pUrl], data_Indeed)
     except TimeoutException:
         attempt += 1
@@ -450,7 +476,10 @@ while (i<cap_Jobrapido):
         daysStr = post.find("div", {"class":"result-item__date"}).text.strip()+datetime.datetime.now().strftime(" %Y")
         pUrl = post.find("a", {"class":"result-item__link"})["href"].replace('"','|')
 
-        current_data = [pTitle.replace('"',"'").replace('=',''),"",pCompany.replace('"',"'"),taeLocation(pLocation)]
+        hybridremote = findWorktype(taeLocation(pLocation).replace('Remote ','').replace('remote ','').replace('Hybrid ','').replace('Hybride ','').replace('hybrid ','').replace('hybride ',''))
+        if hybridremote == "":
+            hybridremote = findWorktype(pTitle)
+        current_data = [pTitle.replace('"',"'").replace('=',''),"",pCompany.replace('"',"'"),taeLocation(pLocation).replace('Remote ','').replace('remote ','').replace('Hybrid ','').replace('Hybride ','').replace('hybrid ','').replace('hybride ',''),hybridremote]
         taeDataCase(pUrl, current_data, current_data+[datetime.datetime.strptime(daysStr,"%d %b %Y").strftime("%a %d %b %Y"),"Jobrapido",pUrl], data_Jobrapido)
 
 
@@ -515,7 +544,10 @@ while (i<cap_Jobillico):
                 if link:
                     pUrl = "https://www.jobillico.com"+link['href']
                     
-            current_data = [pTitle.replace('"',"'").replace('=',''),"",pCompany.replace('"',"'"),taeLocation(pLocation)]
+            hybridremote = findWorktype(taeLocation(pLocation).replace('Remote ','').replace('remote ','').replace('Hybrid ','').replace('Hybride ','').replace('hybrid ','').replace('hybride ',''))
+            if hybridremote == "":
+                hybridremote = findWorktype(pTitle)
+            current_data = [pTitle.replace('"',"'").replace('=',''),"",pCompany.replace('"',"'"),taeLocation(pLocation).replace('Remote ','').replace('remote ','').replace('Hybrid ','').replace('Hybride ','').replace('hybrid ','').replace('hybride ',''),hybridremote]
             taeDataCase(pUrl, current_data, current_data+[(datetime.datetime.now()-datetime.timedelta(days)).strftime("%a %d %b %Y"),"Jobillico",pUrl], data_Jobillico)
 
 
@@ -525,7 +557,7 @@ driver = webdriver.Chrome(options=options, service=ChromeService(ChromeDriverMan
 driver.maximize_window()
 
 page_url_linkedin1 = "https://ca.linkedin.com/jobs/linkedin-jobs?position=1&pageNum=0"
-page_url_linkedin2 = "https://www.linkedin.com/jobs/search?keywords=&location=Montreal%2C%20Quebec%2C%20Canada&locationId=&geoId=101330853&sortBy=DD&f_TPR=&position=1&pageNum=0"
+page_url_linkedin2 = "https://www.linkedin.com/jobs/search?keywords=&location=Montreal%2C%20Quebec%2C%20Canada&locationId=&geoId=101330853&sortBy=DD&f_TPR=r86400&position=1&pageNum=0"
 
 driver.get(page_url_linkedin1)
 time.sleep(3)
@@ -569,7 +601,10 @@ for post in posts:
         pLocation = taeLocation(post.find_element('css selector', 'span.job-search-card__location').get_attribute("innerText").strip().replace("Quebec, Canada","QC"))
         pUrl = post.find_element('css selector', 'a.base-card__full-link').get_attribute('href')
 
-        current_data = [pTitle.replace('"',"'").replace('=',''),pSalary,pCompany.replace('"',"'"),taeLocation(pLocation)]
+        hybridremote = findWorktype(taeLocation(pLocation).replace('Remote ','').replace('remote ','').replace('Hybrid ','').replace('Hybride ','').replace('hybrid ','').replace('hybride ',''))
+        if hybridremote == "":
+            hybridremote = findWorktype(pTitle)
+        current_data = [pTitle.replace('"',"'").replace('=',''),pSalary,pCompany.replace('"',"'"),taeLocation(pLocation).replace('Remote ','').replace('remote ','').replace('Hybrid ','').replace('Hybride ','').replace('hybrid ','').replace('hybride ',''),hybridremote]
         taeDataCase(pUrl, current_data, current_data+[datetime.datetime.strptime(pTime,"%Y-%m-%d").strftime("%a %d %b %Y"),"Linkedin",pUrl], data_Linkedin)
 driver.close()
 driver.quit()
@@ -656,12 +691,15 @@ for post in posts:
 
         pUrl = post.find_element('css selector', 'a[data-testid="jobTitle"]').get_attribute('href')
 
-        current_data = [pTitle.replace('"',"'").replace('=',''),pSalary,pCompany.replace('"',"'"),taeLocation(pLocation)]
+        hybridremote = findWorktype(taeLocation(pLocation).replace('Remote ','').replace('remote ','').replace('Hybrid ','').replace('Hybride ','').replace('hybrid ','').replace('hybride ',''))
+        if hybridremote == "":
+            hybridremote = findWorktype(pTitle)
+        current_data = [pTitle.replace('"',"'").replace('=',''),pSalary,pCompany.replace('"',"'"),taeLocation(pLocation).replace('Remote ','').replace('remote ','').replace('Hybrid ','').replace('Hybride ','').replace('hybrid ','').replace('hybride ',''),hybridremote]
         taeDataCase(pUrl, current_data, current_data+[(datetime.datetime.now()-datetime.timedelta(days)).strftime("%a %d %b %Y"),"Monster",pUrl], data_Monster)
 driver.close()
 driver.quit()
 
-
+'''
 pSalary = ''
 i=0
 page_url = "https://www.jobboom.com/en"
@@ -708,11 +746,13 @@ while (i<cap_Jobboom):
 
         pUrl = "https://www.jobboom.com"+link_title['href']
 
-        current_data = [pTitle.replace('"',"'").replace('=',''),"",pCompany.replace('"',"'"),taeLocation(pLocation)]
+        hybridremote = findWorktype(taeLocation(pLocation).replace('Remote ','').replace('remote ','').replace('Hybrid ','').replace('Hybride ','').replace('hybrid ','').replace('hybride ',''))
+        if hybridremote == "":
+            hybridremote = findWorktype(pTitle)
+        current_data = [pTitle.replace('"',"'").replace('=',''),"",pCompany.replace('"',"'"),taeLocation(pLocation).replace('Remote ','').replace('remote ','').replace('Hybrid ','').replace('Hybride ','').replace('hybrid ','').replace('hybride ',''),hybridremote]
         taeDataCase(pUrl, current_data, current_data+[(datetime.datetime.now()).strftime("%a %d %b %Y"),"Jobboom",pUrl], data_Jobboom)
 session.close()
 
-'''
 i=0
 page_url = "https://www.eluta.ca/"
 req = Request(page_url, headers={'User-Agent': 'Mozilla/5.0'})
@@ -779,8 +819,14 @@ while (i<cap_Eluta):
         pUrl = "https://www.eluta.ca"+ pUrl[:len(pUrl)-2]
 
         if not noDate:
+            hybridremote = findWorktype(taeLocation(pLocation))
+            if hybridremote == "":
+                hybridremote = findWorktype(pTitle)
             current_data = [pTitle.replace('"',"'").replace('=',''),pSalary.replace('"',"'"),pCompany.replace('"',"'"),taeLocation(pLocation)]
-            rest_current_data = [(datetime.datetime.now()-datetime.timedelta(days)).strftime("%a %d %b %Y"),"Eluta",pUrl]
+            hybridremote = findWorktype(taeLocation(pLocation))
+            if hybridremote == "":
+                hybridremote = findWorktype(pTitle)
+            current_data = [(datetime.datetime.now()-datetime.timedelta(days)).strftime("%a %d %b %Y"),"Eluta",pUrl]
             current_full_data = current_data+rest_current_data
             taeDataCase(pUrl, current_data, current_full_data, data_Eluta)
 
@@ -834,6 +880,9 @@ while (i<cap_Workopolis):
 
         pUrl = "https://www.workopolis.com/jobsearch/viewjob/"+post.get('data-jobkey')
 
+        hybridremote = findWorktype(taeLocation(pLocation))
+        if hybridremote == "":
+            hybridremote = findWorktype(pTitle)
         current_data = [pTitle.replace('"',"'").replace('=',''),pSalary,pCompany.replace('"',"'"),taeLocation(pLocation)]
         taeDataCase(pUrl, current_data, current_data+[datetime.datetime.strptime(daysStr,"%Y-%m-%d").strftime("%a %d %b %Y"),"Workopolis",pUrl], data_Workopolis)
 
@@ -939,12 +988,14 @@ if driver.find_elements('css selector', "input.gLFyf.gsfi"):
                         else:
                             pSalary = t.replace('–',' - ').replace('"',"'")
 
+            hybridremote = findWorktype(taeLocation(pLocation))
+            if hybridremote == "":
+                hybridremote = findWorktype(pTitle)
             current_data = [pTitle.replace('"',"'").replace('=',''),pSalary,pCompany.replace('"',"'"),taeLocation(pLocation)]
             taeDataCase(pUrl, current_data, current_data+[(datetime.datetime.now()-datetime.timedelta(days)).strftime("%a %d %b %Y"),"Google jobs",pUrl], data_Google_jobs)
 driver.close()
 driver.quit()
 '''
-
 
 # opens and writes file
 with open(filename,"w", encoding='utf-8-sig') as f:
@@ -980,11 +1031,11 @@ with open(filename,"w", encoding='utf-8-sig') as f:
         f.write((str('\n'.join(data_Monster_writer))).encode().decode()+'\n')
     else:
         print("Empty data file for Monster")
-    if (len(data_Jobboom)>0):
-        taeWriteSorted(data_Jobboom, data_Jobboom_writer)
-        f.write((str('\n'.join(data_Jobboom_writer))).encode().decode()+'\n')
-    else:
-        print("Empty data file for Jobboom")
+#   if (len(data_Jobboom)>0):
+#       taeWriteSorted(data_Jobboom, data_Jobboom_writer)
+#       f.write((str('\n'.join(data_Jobboom_writer))).encode().decode()+'\n')
+#   else:
+#        print("Empty data file for Jobboom")
     if (len(data_Google_jobs)>0):
         taeWriteSorted(data_Google_jobs, data_Google_jobs_writer)
         f.write((str('\n'.join(data_Google_jobs_writer))).encode().decode()+'\n')
