@@ -138,35 +138,78 @@ def taeDataCase(pUrl, current_data, current_full_data, data_Website):
         else:                                                  #Data exist
             print("Duplicate",current_full_data[6])
 
-#fixs most string errors
-def taeLocation(pLocation):
-    location = pLocation.replace('"',"'").replace(',',' ').replace('â','a').replace('ô','o').replace('Ã©','e').replace('é','e').replace('É','e').replace('è','e').replace('Ã´','o').replace('.',' ').replace('’',"'").replace('´',"'").replace("("," ").replace(")"," ").replace("|"," ").replace("/"," ").replace("–","-").replace(" -","-").replace("- ","-").replace("  "," ")
-    location = location.replace('St ','Saint ').replace('Ste ','Sainte ').replace('St-','Saint-').replace('Ste-','Sainte-')
-    location = location.replace("Niagara On The Lake","Niagara-on-the-Lake").replace('Barrys Bay',"Barry's Bay").replace('Burks Falls',"Burk's Falls").replace('Lions Head',"Lion's Head").replace("Greater Toronto Area Canada","Greater Toronto Area ON")
-    location = location.replace('Cote-Saint-Luc','Cote Saint-Luc').replace('Dollard-Des-Ormeaux','Dollard-Des Ormeaux').replace('Dollard-des-Ormeaux','Dollard-Des Ormeaux').replace("Kitchener-Waterloo","Kitchener")
-    location = location.replace("MONTREAL","Montreal").replace("MISSISSAUGA","Mississauga").replace("Montreal St Laurent ","Saint-Laurent").replace("Mississauga Canada","Mississauga ON")
-    location = location.replace("Mississauga CA","Mississauga ON").replace("Greater Montreal Area","Montreal").replace("Greater Montreal","Montreal").replace("Saint Laurent", "Saint-Laurent")
-    location = location.replace("Montreal CA","Montreal QC")
-    location = location.split(" +1 ")[0]
-    if (len(location.split(" "))>2) and ("Montreal" in (location.split(" "))) and ("Old" not in location) and ("Nord" not in location) and ("city" not in location):
-        location = location.split(" ")
-        location.remove("Montreal")
-        location = " ".join(location)
-    if (len(location.split(" "))>2) and ("Quebec" in (location.split(" "))) and ("de Quebec" not in location) and ("city" not in location):
+    '''
+    
+    if (len(location.split(" "))>2) and ("Quebec" in (location.split(" "))) and ("De Quebec" not in location) and ("City" not in location):
         location = location.split(" ")
         location.remove("Quebec")
         location = " ".join(location)
-    if location == "ON":
+    if location == "On":
         location = "Ontario"
-    if location == "ON ON":
+    if location == "On On":
         location = "Ontario"
-    if location == "QC":
+    if location == "Qc":
         location = "Quebec"
-    if location == "QC QC":
+    if location == "Qc Qc":
         location = "Quebec"
-    location.replace(' in ',' ');
-    if location.startswith("in "):
-        location = location[3:]
+    '''
+    
+#fixs most string errors
+def taeLocation(pLocation):
+    location = pLocation.title().replace('"',"'").replace(',',' ').replace('â','a').replace('ô','o').replace('Ã©','e').replace('é','e').replace('É','e').replace('è','e').replace('Ã´','o').replace('.',' ').replace('’',"'").replace('´',"'").replace("("," ").replace(")"," ").replace("|"," ").replace("/"," ").replace("–","-").replace(" -","-").replace("- ","-").replace("  "," ");
+    location = location.replace(' In ',' ').replace('Remote ',' ').replace('Hybrid ',' ').replace('Hybride ',' ').strip()
+    location = location.replace('St ','Saint ').replace('Ste ','Sainte ').replace('St-','Saint-').replace('Ste-','Sainte-')
+    location = location.replace("Niagara On The Lake","Niagara-On-The-Lake").replace('Barrys Bay',"Barry's Bay").replace('Burks Falls',"Burk's Falls").replace('Lions Head',"Lion's Head").replace("Greater Toronto Area Canada","Greater Toronto Area ON")
+    location = location.replace('Cote-Saint-Luc','Cote Saint-Luc').replace('Dollard-Des-Ormeaux','Dollard-Des Ormeaux').replace('Dollard-des-Ormeaux','Dollard-Des Ormeaux').replace("Kitchener-Waterloo","Kitchener")
+    location = location.replace("Mississauga Canada","Mississauga ON").replace("Blue Mountain ","Blue Mountains ").replace("The Blue Mountains ","Blue Mountains ")
+    location = location.replace("Mississauga Ca","Mississauga ON").replace("Greater Toronto Area","Toronto").replace("Greater Toronto","Toronto").replace("Greater Montreal Area","Montreal").replace("Greater Montreal","Montreal").replace("Saint Laurent", "Saint-Laurent")
+    location = location.replace("Greater Napanee","Napanee").replace("Greater Sudbury","Sudbury").replace("Metropolitan Area","").replace("Region On","ON")
+    location = location.split(" +1 ")[0]
+
+    endswithQC = [" Quebec"," Queb"," Quebec Canada"," Quebec Province"]
+    endswithON = [" Ontario"," Ontario Canada"," Ontario Province"]
+    endswithUpper = [" Qc"," On"," Ab"]
+
+    for x in endswithQC:
+        if location.endswith(x):
+            location = location[:-len(x)]+" QC"
+        if location == x[1:]:
+            location = "QC"
+
+    for x in endswithON:
+        if location.endswith(x):
+            location = location[:-len(x)]+" ON"
+        if location == x[1:]:
+            location = "ON"
+
+    for x in endswithUpper:
+        if location.endswith(x):
+            location = location[:-len(x)]+x.upper()
+        if location == x[1:]:
+            location = x[1:].upper()
+
+    if location == "Canada QC":
+        location = "QC"
+    if location == "Canada ON":
+        location = "ON"
+
+    if location == "Quebec Montreal":
+        location = "Montreal QC"
+    if location == "Montreal Canada":
+        location = "Montreal QC"
+    if location == "Montreal Ca":
+        location = "Montreal QC"
+    if location == "Montreal":
+        location = "Montreal QC"
+    
+    #if location.startswith("In ") location = location[3:]
+
+    splitted = [x for x in location.split(" ") if x]
+    notwanted = ["Nord","Sud","Ouest","Est","Old","City","Vieux","Ville"]
+    if (all(item not in notwanted for item in splitted) and "Montreal" in splitted and location != "Montreal QC") or (splitted.count("Montreal") > 1):
+        splitted.remove("Montreal")
+        location = " ".join(splitted)
+
     return location
 
 #removes all data more than 42 days old (6 weeks)
@@ -232,7 +275,7 @@ else:
             else:
                 website = ''.join(row[6:7])
                 if (len(row)>3):
-                    row[3] = taeLocation(row[3]).replace('Remote ','').replace('remote ','').replace('Hybrid ','').replace('Hybride ','').replace('hybrid ','').replace('hybride ','')
+                    row[3] = taeLocation(row[3])
                     if (website == "Indeed"):
                         data_Indeed.append(row)
                     elif (website == "Jobrapido"):
@@ -323,10 +366,21 @@ cap_Linkedin = 50 #50
 cap_Monster = 15 #15
 cap_Jobboom = 60 #60
 
+cap_Indeed = 25 #25
+cap_Jobrapido = 25 #32
+cap_Jobillico = 30 #30
+cap_Linkedin = 50 #50
+cap_Monster = 15 #15
+
+cap_Indeed = 1 #25
+cap_Jobrapido = 1 #32
+cap_Jobillico = 1 #30
+cap_Linkedin = 1 #50
+cap_Monster = 1 #15
 
 '''
 cap_Indeed = 25 #25
-cap_Jobrapido = 32 #32
+cap_Jobrapido = 25 #32
 cap_Jobillico = 30 #30
 cap_Linkedin = 50 #50
 cap_Monster = 15 #15
@@ -397,7 +451,7 @@ while (i<cap_Indeed):
                         pCompany = post.find_element('css selector', 'span[class="companyName"]').get_attribute("innerText").strip()
 
                 if post.find_elements('css selector', 'div[class="companyLocation"]'):
-                    pLocation = taeLocation(post.find_element('css selector', 'div[class="companyLocation"]').get_attribute("innerText").strip())
+                    pLocation = post.find_element('css selector', 'div[class="companyLocation"]').get_attribute("innerText").strip()
                     if "+" in pLocation:
                         pLocation = pLocation.split("+")
                         pLocation = str(pLocation[0])
@@ -413,10 +467,10 @@ while (i<cap_Indeed):
                         pUrl = post.find_element('css selector', "a[id^='job_']").get_attribute('href')
 
                 if pUrl != "":
-                    hybridremote = findWorktype(taeLocation(pLocation).replace('Remote ','').replace('remote ','').replace('Hybrid ','').replace('Hybride ','').replace('hybrid ','').replace('hybride ',''))
+                    hybridremote = findWorktype(pLocation)
                     if hybridremote == "":
                         hybridremote = findWorktype(pTitle)
-                    current_data = [pTitle.replace('"',"'").replace('=',''),pSalary,pCompany.replace('"',"'"),taeLocation(pLocation).replace('Remote ','').replace('remote ','').replace('Hybrid ','').replace('Hybride ','').replace('hybrid ','').replace('hybride ',''),hybridremote]
+                    current_data = [pTitle.replace('"',"'").replace('=',''),pSalary,pCompany.replace('"',"'"),taeLocation(pLocation),hybridremote]
                     taeDataCase(pUrl, current_data, current_data+[(datetime.datetime.now()-datetime.timedelta(days)).strftime("%a %d %b %Y"),'Indeed',pUrl], data_Indeed)
     except TimeoutException:
         attempt += 1
@@ -465,7 +519,7 @@ while (i<cap_Jobrapido):
         if (len(post.findAll("span", {"class":"result-item__location-label"}))>0):
             pLocation = post.find("span", {"class":"result-item__location-label"}).text.strip()
             if "(" in pLocation:
-                pLocation = taeLocation(pLocation.replace("Montreal",""))
+                pLocation = pLocation.strip().replace("Montreal","")
                 pLocation = pLocation.replace("Est","Montreal-Est").replace("Ouest","Montreal-Ouest").replace("Nord","Montreal-Nord")
                 pLocation = pLocation.split(" ")
                 pLocation[:] = [x for x in pLocation if x]
@@ -476,10 +530,10 @@ while (i<cap_Jobrapido):
         daysStr = post.find("div", {"class":"result-item__date"}).text.strip()+datetime.datetime.now().strftime(" %Y")
         pUrl = post.find("a", {"class":"result-item__link"})["href"].replace('"','|')
 
-        hybridremote = findWorktype(taeLocation(pLocation).replace('Remote ','').replace('remote ','').replace('Hybrid ','').replace('Hybride ','').replace('hybrid ','').replace('hybride ',''))
+        hybridremote = findWorktype(pLocation)
         if hybridremote == "":
             hybridremote = findWorktype(pTitle)
-        current_data = [pTitle.replace('"',"'").replace('=',''),"",pCompany.replace('"',"'"),taeLocation(pLocation).replace('Remote ','').replace('remote ','').replace('Hybrid ','').replace('Hybride ','').replace('hybrid ','').replace('hybride ',''),hybridremote]
+        current_data = [pTitle.replace('"',"'").replace('=',''),"",pCompany.replace('"',"'"),taeLocation(pLocation),hybridremote]
         taeDataCase(pUrl, current_data, current_data+[datetime.datetime.strptime(daysStr,"%d %b %Y").strftime("%a %d %b %Y"),"Jobrapido",pUrl], data_Jobrapido)
 
 
@@ -544,10 +598,10 @@ while (i<cap_Jobillico):
                 if link:
                     pUrl = "https://www.jobillico.com"+link['href']
                     
-            hybridremote = findWorktype(taeLocation(pLocation).replace('Remote ','').replace('remote ','').replace('Hybrid ','').replace('Hybride ','').replace('hybrid ','').replace('hybride ',''))
+            hybridremote = findWorktype(pLocation)
             if hybridremote == "":
                 hybridremote = findWorktype(pTitle)
-            current_data = [pTitle.replace('"',"'").replace('=',''),"",pCompany.replace('"',"'"),taeLocation(pLocation).replace('Remote ','').replace('remote ','').replace('Hybrid ','').replace('Hybride ','').replace('hybrid ','').replace('hybride ',''),hybridremote]
+            current_data = [pTitle.replace('"',"'").replace('=',''),"",pCompany.replace('"',"'"),taeLocation(pLocation),hybridremote]
             taeDataCase(pUrl, current_data, current_data+[(datetime.datetime.now()-datetime.timedelta(days)).strftime("%a %d %b %Y"),"Jobillico",pUrl], data_Jobillico)
 
 
@@ -598,13 +652,13 @@ for post in posts:
             pSalary = " ".join((post.find_element('css selector', 'span.job-search-card__salary-info').get_attribute("innerText").strip().replace('"',"'")).split())
         pTime = post.find_element('css selector', "time[class^='job-search-card__listdate']").get_attribute('datetime')
         pCompany = post.find_element('css selector', 'h4.base-search-card__subtitle').get_attribute("innerText").strip()
-        pLocation = taeLocation(post.find_element('css selector', 'span.job-search-card__location').get_attribute("innerText").strip().replace("Quebec, Canada","QC"))
+        pLocation = post.find_element('css selector', 'span.job-search-card__location').get_attribute("innerText").strip()
         pUrl = post.find_element('css selector', 'a.base-card__full-link').get_attribute('href')
 
-        hybridremote = findWorktype(taeLocation(pLocation).replace('Remote ','').replace('remote ','').replace('Hybrid ','').replace('Hybride ','').replace('hybrid ','').replace('hybride ',''))
+        hybridremote = findWorktype(pLocation)
         if hybridremote == "":
             hybridremote = findWorktype(pTitle)
-        current_data = [pTitle.replace('"',"'").replace('=',''),pSalary,pCompany.replace('"',"'"),taeLocation(pLocation).replace('Remote ','').replace('remote ','').replace('Hybrid ','').replace('Hybride ','').replace('hybrid ','').replace('hybride ',''),hybridremote]
+        current_data = [pTitle.replace('"',"'").replace('=',''),pSalary,pCompany.replace('"',"'"),taeLocation(pLocation),hybridremote]
         taeDataCase(pUrl, current_data, current_data+[datetime.datetime.strptime(pTime,"%Y-%m-%d").strftime("%a %d %b %Y"),"Linkedin",pUrl], data_Linkedin)
 driver.close()
 driver.quit()
@@ -685,16 +739,14 @@ for post in posts:
             pCompany = post.find_element('css selector', 'span[data-testid="company"]').get_attribute("innerText").strip()
 
         if post.find_elements('css selector', 'span[data-testid="jobDetailLocation"]'):
-            pLocation = taeLocation(post.find_element('css selector', 'span[data-testid="jobDetailLocation"]').get_attribute("innerText").strip())
-            if len(pLocation.split(' '))==1 and not pLocation.split(" ") == [""]:
-                pLocation = pLocation+' QC'
+            pLocation = post.find_element('css selector', 'span[data-testid="jobDetailLocation"]').get_attribute("innerText").strip()
 
         pUrl = post.find_element('css selector', 'a[data-testid="jobTitle"]').get_attribute('href')
 
-        hybridremote = findWorktype(taeLocation(pLocation).replace('Remote ','').replace('remote ','').replace('Hybrid ','').replace('Hybride ','').replace('hybrid ','').replace('hybride ',''))
+        hybridremote = findWorktype(pLocation)
         if hybridremote == "":
             hybridremote = findWorktype(pTitle)
-        current_data = [pTitle.replace('"',"'").replace('=',''),pSalary,pCompany.replace('"',"'"),taeLocation(pLocation).replace('Remote ','').replace('remote ','').replace('Hybrid ','').replace('Hybride ','').replace('hybrid ','').replace('hybride ',''),hybridremote]
+        current_data = [pTitle.replace('"',"'").replace('=',''),pSalary,pCompany.replace('"',"'"),taeLocation(pLocation),hybridremote]
         taeDataCase(pUrl, current_data, current_data+[(datetime.datetime.now()-datetime.timedelta(days)).strftime("%a %d %b %Y"),"Monster",pUrl], data_Monster)
 driver.close()
 driver.quit()
@@ -746,10 +798,10 @@ while (i<cap_Jobboom):
 
         pUrl = "https://www.jobboom.com"+link_title['href']
 
-        hybridremote = findWorktype(taeLocation(pLocation).replace('Remote ','').replace('remote ','').replace('Hybrid ','').replace('Hybride ','').replace('hybrid ','').replace('hybride ',''))
+        hybridremote = findWorktype(pLocation)
         if hybridremote == "":
             hybridremote = findWorktype(pTitle)
-        current_data = [pTitle.replace('"',"'").replace('=',''),"",pCompany.replace('"',"'"),taeLocation(pLocation).replace('Remote ','').replace('remote ','').replace('Hybrid ','').replace('Hybride ','').replace('hybrid ','').replace('hybride ',''),hybridremote]
+        current_data = [pTitle.replace('"',"'").replace('=',''),"",pCompany.replace('"',"'"),taeLocation(pLocation),hybridremote]
         taeDataCase(pUrl, current_data, current_data+[(datetime.datetime.now()).strftime("%a %d %b %Y"),"Jobboom",pUrl], data_Jobboom)
 session.close()
 
@@ -819,11 +871,11 @@ while (i<cap_Eluta):
         pUrl = "https://www.eluta.ca"+ pUrl[:len(pUrl)-2]
 
         if not noDate:
-            hybridremote = findWorktype(taeLocation(pLocation))
+            hybridremote = findWorktype(pLocation)
             if hybridremote == "":
                 hybridremote = findWorktype(pTitle)
             current_data = [pTitle.replace('"',"'").replace('=',''),pSalary.replace('"',"'"),pCompany.replace('"',"'"),taeLocation(pLocation)]
-            hybridremote = findWorktype(taeLocation(pLocation))
+            hybridremote = findWorktype(pLocation)
             if hybridremote == "":
                 hybridremote = findWorktype(pTitle)
             current_data = [(datetime.datetime.now()-datetime.timedelta(days)).strftime("%a %d %b %Y"),"Eluta",pUrl]
@@ -880,7 +932,7 @@ while (i<cap_Workopolis):
 
         pUrl = "https://www.workopolis.com/jobsearch/viewjob/"+post.get('data-jobkey')
 
-        hybridremote = findWorktype(taeLocation(pLocation))
+        hybridremote = findWorktype(pLocation)
         if hybridremote == "":
             hybridremote = findWorktype(pTitle)
         current_data = [pTitle.replace('"',"'").replace('=',''),pSalary,pCompany.replace('"',"'"),taeLocation(pLocation)]
@@ -988,7 +1040,7 @@ if driver.find_elements('css selector', "input.gLFyf.gsfi"):
                         else:
                             pSalary = t.replace('–',' - ').replace('"',"'")
 
-            hybridremote = findWorktype(taeLocation(pLocation))
+            hybridremote = findWorktype(pLocation)
             if hybridremote == "":
                 hybridremote = findWorktype(pTitle)
             current_data = [pTitle.replace('"',"'").replace('=',''),pSalary,pCompany.replace('"',"'"),taeLocation(pLocation)]
