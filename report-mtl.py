@@ -380,7 +380,7 @@ cap_Monster = 1 #15
 
 '''
 cap_Indeed = 25 #25
-cap_Jobrapido = 25 #32
+cap_Jobrapido = 20 #32
 cap_Jobillico = 30 #30
 cap_Linkedin = 50 #50
 cap_Monster = 15 #15
@@ -922,7 +922,7 @@ while (i<cap_Workopolis):
 
         if (len(post.findAll("span", {"class":"SerpJob-location"}))>0):
             pLocation = post.find("span", {"class":"SerpJob-location"}).text.strip()
-            pLocation = pLocation.split('— ')
+            pLocation = pLocation.split('— ')
             pLocation = str(pLocation[1])
 
         if (len(post.findAll("time", {"class":"SerpJob-age"}))>0):
